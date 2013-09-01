@@ -51,7 +51,15 @@ def splitStrXY(str):
     y = int(0.5+(float(str.split(',')[1])))
     return x,y
 
+def capFirstLetOnly(str)
+     if str[0].islower:
+        str = str[0].upper() + str[1:]
+
 def main():
+
+    #load in file - here I'm doing it manually
+    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\curvySVG.txt"
+
     #instantiate some arrays we'll use
     commands = []
     xCoords = []
@@ -81,9 +89,6 @@ def main():
     pathFirstXCoord = 0
     pathFirstYCoord = 0
 
-    #load in file - here I'm doing it manually
-    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\kaylasSVG.txt"
-
     #read in the file and parse out the paths into an array of strings
     svgStr = readInFile(file)
     pathStrings = parsePaths(svgStr)
@@ -92,10 +97,9 @@ def main():
     #iteratively run through the paths, correct letters, and reorganize
     #into the different arrays
     for path in pathStrings:
-        if path[0].islower:
-            path = path[0].upper() + path[1:]
-        elements = path.split(' ')
-        pathFirstCoordFlag = True
+        path = capFirstLetOnly(path) #we want to make sure the first letter is capitalized
+        elements = path.split(' ') #split the elements based on spaces
+        pathFirstCoordFlag = True #raise the falg to say it's the first coord of the path
 
         #iterate through each element of the path i.e. each letter or number set
         for element in elements:
@@ -113,10 +117,14 @@ def main():
                    lastComm = 'zZ'
 
                 elif re.match("[cC]", element):
-                    #do someting else
+                    #if the letter is C, then just set the right flags, and we'll
+                    #take care of it when we get to the actual numbers (see below)
+                    if re.match("[c]", element):
+                        lastComm = 'c'
+                    else:
+                        lastComm = 'C'
                     Ccount = 0
                     lastElemLet = True
-                    lastComm = 'cC'
 
                 else: #letter is m/M/l/L
                     #if the letter is lowercase, change the lastCaseUp flag and add
@@ -134,22 +142,40 @@ def main():
 
             #if the element isn't a letter...(it's a number)
             else:
-                if lastComm is 'cC':
-                    if Ccount  is 0:
+                #this section will go through calculating a curve
+                if lastComm is ('c' or 'C'):
+                    if Ccount  is 0: #this is a counter to gather the curve coords
+                        #the first point used to calucalte the curve is the previous point
                         PXArray.append(lastXCoord)
                         PYArray.append(lastYCoord)
                     Ccount += 1
+
+                    #add the current coordinates to the PX and PY arrays
                     PXArray.append(splitStrXY(element)[0])
                     PYArray.append(splitStrXY(element)[1])
-                    if Ccount is 3:
+                    if Ccount is 3: #when you've got 4 points...
+
+                        #Actual Points = P(i/N), so iteratively solve for these
                         for i in range(N):
-                            commands.append('L')
-                            xCoords.append(evalCurveEqtn((i/N), PXArray))
-                            yCoords.append(evalCurveEqtn((i/N), PYArray))
+                            commands.append('L') #each move requires drawing a line
+                            tempx = evalCurveEqtn((i/N), PXArray)
+                            tempy = evalCurveEqtn((i/N), PYArray)
+                            if lastComm is 'c': #if c is lowercase, it's relative to the 1st point
+                                tempx += PXArray[0]
+                                tempy += PYArray[0]
+                            xCoords.append(tempx)
+                            yCoords.append(tempy)
+
+                        #the last point on the curve is the last point given from the file
                         commands.append('L')
-                        xCoords.append(PXArray[3])
-                        yCoords.append(PYArray[3])
-                        Ccount = 0
+                        tempx = PXArray[3]
+                        tempy = PXArray[3]
+                        if lastComm is 'c': #again, if c is lowercase, it's relative
+                            tempx += PXArray[0]
+                            tempy += PYArray[0]
+                        xCoords.append(tempx)
+                        yCoords.append(tempy)
+                        Ccount = 0 #reset the count in case you have another curve
 
 
                 else:
