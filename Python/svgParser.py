@@ -72,7 +72,7 @@ class svgParser:
         return re.match(lookingfor, element)
 
     def sendToArduino(self, i):
-        serOut =str(self.commands[i]) + ' ' + str(self.xCoords[i]) + ',' + str(self.yCoords[i])
+        serOut =str(self.commands[i]) + ' ' + str(self.xCoords[i]) + ',' + str(self.yCoords[i] + '\n')
         self.ser.write(serOut)
         return serOut
 
