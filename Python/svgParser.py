@@ -71,11 +71,15 @@ class svgParser:
         lookingfor = '[' + lookingfor + ']'
         return re.match(lookingfor, element)
 
-    def talkToArduino(self, i):
+    def sendToArduino(self, i):
         serOut =str(self.commands[i]) + ' ' + str(self.xCoords[i]) + ',' + str(self.yCoords[i])
         self.ser.write(serOut)
-        ardCheck = self.ser.read(self.ser.inWaiting())
-        return serOut, ardCheck
+        return serOut
+
+    def readFromArduino(self):
+        self.ser.flush()
+        ardCheck = self.ser.readline()
+        return ardCheck
 
 def main():
 
@@ -233,24 +237,29 @@ def main():
     print mySVG.yCoords
 
     #start talking to Arduino
-    index = 0
-    for eachComm in mySVG.commands:
+    index = 0 #this index refers to the number command we're on as we iterate
+              #through the arrays (command, xcoords, ycoords)
+    for eachComm in mySVG.commands: #for each command...
+        #reset the output and check variables
+        serOut = None
+        ardCheck = None
+
         readyByte = mySVG.ser.read() #read 1 byte from Arduino
-        while readyByte is not 'R':()
-        serOut, ardCheck = mySVG.talkToArduino(index)
-        if serOut is ardCheck:
-            mySVG.ser.write('G')
-        else:
-            serOut, ardCheck = mySVG.talkToArduino(index)
-            if serOut is not ardCheck:
-                print "ERROR" + serOut + ardCheck
-                break
-            else:
-                mySVG.ser.write('G')
+        while readyByte is not 'R':() #wait for the ready signal from the Arduino
+        serOut = mySVG.sendToArduino(index) #write the 3 arrays to the Arduino
+        ardCheck = mySVG.readFromArduino() #read the check from the Arduino
+        if '\n' in ardCheck: #sometimes the check is just a new line character
+                             #if this is the case, read it again
+            ardCheck = mySVG.readFromArduino()
+        while(serOut not in ardCheck): #we're looking for our output to match the check
+                                       #so keep sending/reading until they match
+            serOut = mySVG.sendToArduino(index)
+            ardCheck = mySVG.readFromArduino()
+        mySVG.ser.write('G\n') #when you get the instructions to match, send out a
+                               #go signal and wait for the Arduino to be ready again
         index += 1
-        print "serOut"
         readyByte = None
-    mySVG.ser.close()
+    mySVG.ser.close() #when you're done with everything, close the serial connection
 
 if __name__ == '__main__':
     main()
