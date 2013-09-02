@@ -2,7 +2,7 @@
 # Name:        svgParser
 # Purpose:
 #
-# Author:      Kayla
+# Author:      Kayla Frost
 #
 # Created:     30/08/2013
 # Copyright:   (c) Kayla 2013
@@ -51,14 +51,19 @@ def splitStrXY(str):
     y = int(0.5+(float(str.split(',')[1])))
     return x,y
 
-def capFirstLetOnly(str)
+def capFirstLetOnly(str):
      if str[0].islower:
         str = str[0].upper() + str[1:]
+     return str
+
+def matchAny(lookingfor, element):
+    lookingfor = '[' + lookingfor + ']'
+    return re.match(lookingfor, element)
 
 def main():
 
     #load in file - here I'm doing it manually
-    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\curvySVG.txt"
+    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\curvySVG.svg"
 
     #instantiate some arrays we'll use
     commands = []
@@ -93,7 +98,6 @@ def main():
     svgStr = readInFile(file)
     pathStrings = parsePaths(svgStr)
 
-
     #iteratively run through the paths, correct letters, and reorganize
     #into the different arrays
     for path in pathStrings:
@@ -104,8 +108,8 @@ def main():
         #iterate through each element of the path i.e. each letter or number set
         for element in elements:
             #check to see if the element is an acceptable letter
-            if re.match("[mlzcMLZC]", element):
-                if re.match("[zZ]", element):
+            if matchAny('mlzcMLZC', element):
+                if matchAny('zZ', element):
                    #if the letter is Z, then we need to close the loop by drawing
                    #back to the first coordinate of the path.  To do this, add a
                    #"L" to the command array, and put the initial x and y coords
@@ -116,10 +120,10 @@ def main():
                    lastElemLet = True
                    lastComm = 'zZ'
 
-                elif re.match("[cC]", element):
+                elif matchAny("cC", element):
                     #if the letter is C, then just set the right flags, and we'll
                     #take care of it when we get to the actual numbers (see below)
-                    if re.match("[c]", element):
+                    if matchAny("c", element):
                         lastComm = 'c'
                     else:
                         lastComm = 'C'
@@ -132,7 +136,7 @@ def main():
                     if element.islower():
                         lastCaseUp = False
                         commands.append(element.upper())
-                    #if the letter isn't lowercase, change the flag and  add the
+                    #if the letter isn't lowercase, change the flag and add the
                     #element to the commands
                     else:
                         lastCaseUp = True
@@ -145,26 +149,28 @@ def main():
                 #this section will go through calculating a curve
                 if lastComm is ('c' or 'C'):
                     if Ccount  is 0: #this is a counter to gather the curve coords
-                        #the first point used to calucalte the curve is the previous point
+                        #the first point used to calucalte the curve is the previous
+                        #point, so add the x and y to the corresponding P arrays
                         PXArray.append(lastXCoord)
                         PYArray.append(lastYCoord)
-                    Ccount += 1
+                    Ccount += 1 #increment count because we've got 1 point down
 
                     #add the current coordinates to the PX and PY arrays
-                    PXArray.append(splitStrXY(element)[0])
-                    PYArray.append(splitStrXY(element)[1])
+                    tempx = splitStrXY(element)[0]
+                    tempy = splitStrXY(element)[1]
+                    if lastComm is 'c':
+                        #if c is lowercase, it's relative to the 1st point
+                        tempx += PXArray[0]
+                        tempy += PYArray[0]
+                    PXArray.append(tempx)
+                    PYArray.append(tempy)
                     if Ccount is 3: #when you've got 4 points...
 
                         #Actual Points = P(i/N), so iteratively solve for these
                         for i in range(N):
                             commands.append('L') #each move requires drawing a line
-                            tempx = evalCurveEqtn((i/N), PXArray)
-                            tempy = evalCurveEqtn((i/N), PYArray)
-                            if lastComm is 'c': #if c is lowercase, it's relative to the 1st point
-                                tempx += PXArray[0]
-                                tempy += PYArray[0]
-                            xCoords.append(tempx)
-                            yCoords.append(tempy)
+                            xCoords.append(int(evalCurveEqtn((float(i)/N), PXArray)))
+                            yCoords.append(int(evalCurveEqtn((float(i)/N), PYArray)))
 
                         #the last point on the curve is the last point given from the file
                         commands.append('L')
