@@ -1,7 +1,4 @@
-float lengthL, lengthR; //length from motor to platform
-
-Stepper stepperL(NSTEPS, 6,7,8,9);  
-Stepper stepperR(NSTEPS, 10,11,12,13);  
+float lengthL, lengthR; //length from motor to platform 
 
 void plottingSetup()
 {

@@ -17,3 +17,20 @@ const float STEP_DIST = 1;//CIRCUM/NSTEPS; //the change in distance between moto
 // (0,0) is at the left spindle
 const int COORD_OFFSET_X = 50; //so at what coordinates is the top left
 const int COORD_OFFSET_Y = 150; // corner of the canvas?
+
+const float PAINTING_DISTANCE = 400;
+const int BPOS_APPLY = 95; //angle of the brush servo when the brush is applied
+const int BPOS_DIP = 5; //angle of the brush servo when dipping in paint
+const int BPOS_LIFT = 65; //angle of the brush servo when lifted
+
+const float PAINT_X = 140;
+const float PAINT_Y = 800;
+coord cPaint;
+
+
+const int DIP_STEPS = 40; //number of steps down from cPaint to move to dip brush
+
+const int PIN_BRUSH_SERVO = 2;
+const int PIN_ROTATE_SERVO = 3;
+
+

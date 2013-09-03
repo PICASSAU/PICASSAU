@@ -1,9 +1,18 @@
 #include "picassau.h"
 #include <Stepper.h>
+#include <Servo.h>
 
 char command = 0;
 coord cDest; //destination coordinates
 coord cCur; //current coordinates
+
+float brushDist = 0;
+float totalDist = 0;
+float strokeDist = 0;
+
+Stepper stepperL(NSTEPS, 6,7,8,9);  
+Stepper stepperR(NSTEPS, 10,11,12,13); 
+
 
 void setup()
 {
@@ -22,10 +31,20 @@ void loop()
   } while (!verifyInstruction());
   
   if (command == 'M')
-  {//don't use brush
+  {
+    removeBrush();
+    totalDist += getDistFromPoint(cCur, cDest);
   }
   else if (command == 'L')
-  {//use brush
+  {
+    applyBrush();
+    float tempDist = getDistFromPoint(cCur, cDest);
+    totalDist += tempDist;
+    brushDist += tempDist;
+    strokeDist += tempDist;
+    //if you will have painted too much, AND you've gone far enough
+    if ((strokeDist > PAINTING_DISTANCE) && (strokeDist - tempDist > PAINTING_DISTANCE / 16))
+      dipBrush();
   }
     
   moveToPoint(cDest);
