@@ -24,7 +24,17 @@ class svgParser:
         self.xCoords = []
         self.yCoords = []
 
-        self.ser = serial.Serial('COM5') #9600 Baud, 8 data bits, No parity, 1 stop bit
+        #use these variables to scale the instructions for the Arduino
+        #these need to be floats, so include a decmial point
+        self.canvasX = 22.0 #the dimension of the canvas in the x direction (in)
+        self.canvasY = 28.0 #the dimension of the canvas in the y direction (in)
+        self.ardDist = (100/11.125) #how much the motor moves in one step
+
+        self.fileWidth = 1 #default file width - found in svg file
+        self.fileHeight = 1 #default file height - found in svg file
+
+
+#        self.ser = serial.Serial('COM5') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
 
     def readInFile(self, file):
@@ -49,27 +59,72 @@ class svgParser:
         '''
         doc = minidom.parseString(svgStr)
         pathStrings = [path.getAttribute('d') for path in
-                        doc.getElementsByTagName('path')]
+                       doc.getElementsByTagName('path')]
+        self.fileWidth = [path.getAttribute('width') for path in
+                          doc.getElementsByTagName('svg')]
+        self.fileHeight = [path.getAttribute('height') for path in
+                       doc.getElementsByTagName('svg')]
+        self.scaleX = (self.canvasX/floa(self.fileWidth[0]))*self.ardDist
+        self.scaleY = (self.canvasY/float(self.fileHeight[0]))*self.ardDist
         doc.unlink()
-        return pathStrings
+        return pathStrings, self.fileWidth, self.fileHeight
 
     def evalCurveEqtn(self, t, PArray):
+        '''
+        This function does some crazy math to evaluate the curve equation.
+        It requires the t value (ranges from 0 to 1) and an array of P values
+        that includes 4 entries.
+
+        '''
+
         Pt = pow((1-t),3)*PArray[0] + 3*pow(1-t,2)*t*PArray[1] + 3*(1-t)*pow(t,2)*PArray[2] + pow(t,3)*PArray[3]
         return Pt
 
     def splitStrXY(self, str):
+        '''
+        This function is used to split coordinates.  It deliniates the given
+        string using a comma, sending the first part followed by the second part
+        (usually x,y).
+
+        '''
         x = int(0.5+(float(str.split(',')[0])))
         y = int(0.5+(float(str.split(',')[1])))
         return x,y
 
     def capFirstLetOnly(self, str):
-         if str[0].islower:
+        '''
+        Given a string, this function will capitalize the first letter only,
+        leaving the rest of the string as it was.
+
+        '''
+        if str[0].islower:
             str = str[0].upper() + str[1:]
-         return str
+        return str
 
     def matchAny(self, lookingfor, element):
+        '''
+        Given the string of what you're looking for, this function will return
+        a boolean True if any character in the "lookingfor" is in "element".
+
+        '''
         lookingfor = '[' + lookingfor + ']'
         return re.match(lookingfor, element)
+
+    def addToList(self, addition, listName):
+        '''
+        Given the addition, this function will add it to the appropriate list,
+        given as a string (all lowercase).
+        'command' = the command array
+        'x' = the x array
+        'y' = the y array
+
+        '''
+        if listName is 'command': #if the addition is a command...
+            self.commands.append(addition)
+        elif listName is 'x': #else if the addition is an x coordinate...
+            self.xCoords.append(int((addition*self.scaleX)+0.5))
+        else: #hopefully the addtion is a y coordinate...
+            self.yCoords.append(int((addition*self.scaleY)+0.5))
 
     def sendToArduino(self, i):
         serOut =str(self.commands[i]) + ' ' + str(self.xCoords[i]) + ',' + str(self.yCoords[i] + '\n')
@@ -113,7 +168,7 @@ def main():
 
     #read in the file and parse out the paths into an array of strings
     svgStr = mySVG.readInFile(file)
-    pathStrings = mySVG.parsePaths(svgStr)
+    pathStrings, mySVG.fileWidth, mySVG.fileHeight = mySVG.parsePaths(svgStr)
 
     #iteratively run through the paths, correct letters, and reorganize
     #into the different arrays
@@ -131,9 +186,9 @@ def main():
                    #back to the first coordinate of the path.  To do this, add a
                    #"L" to the command array, and put the initial x and y coords
                    #into the x and y arrays.
-                   mySVG.commands.append('L')
-                   mySVG.xCoords.append(pathFirstXCoord)
-                   mySVG.yCoords.append(pathFirstYCoord)
+                   mySVG.addToList('L', 'command')
+                   mySVG.addToList(pathFirstXCoord, 'x')
+                   mySVG.addToList(pathFirstYCoord, 'y')
                    lastElemLet = True
                    lastComm = 'zZ'
 
@@ -152,12 +207,12 @@ def main():
                     #the uppercase version to the command array
                     if element.islower():
                         lastCaseUp = False
-                        mySVG.commands.append(element.upper())
+                        mySVG.addToList(element.upper, 'command')
                     #if the letter isn't lowercase, change the flag and add the
                     #element to the commands
                     else:
                         lastCaseUp = True
-                        mySVG.commands.append(element)
+                        mySVG.addToList(element, 'command')
                     lastElemLet = True
                     lastComm = 'mMlL'
 
@@ -185,19 +240,19 @@ def main():
 
                         #Actual Points = P(i/N), so iteratively solve for these
                         for i in range(N):
-                            mySVG.commands.append('L') #each move requires drawing a line
-                            mySVG.xCoords.append(int(mySVG.evalCurveEqtn((float(i)/N), PXArray)))
-                            mySVG.yCoords.append(int(mySVG.evalCurveEqtn((float(i)/N), PYArray)))
+                            mySVG.addToList('L', 'command') #each move requires drawing a line
+                            mySVG.addToList(int(mySVG.evalCurveEqtn((float(i)/N), PXArray)), 'x')
+                            mySVG.addToList(int(mySVG.evalCurveEqtn((float(i)/N), PYArray)), 'y')
 
                         #the last point on the curve is the last point given from the file
-                        mySVG.commands.append('L')
+                        mySVG.addToList('L', 'command')
                         tempx = PXArray[3]
                         tempy = PXArray[3]
                         if lastComm is 'c': #again, if c is lowercase, it's relative
                             tempx += PXArray[0]
                             tempy += PYArray[0]
-                        mySVG.xCoords.append(tempx)
-                        mySVG.yCoords.append(tempy)
+                        mySVG.addToList(tempx, 'x')
+                        mySVG.addToList(tempy, 'y')
                         Ccount = 0 #reset the count in case you have another curve
 
 
@@ -205,7 +260,7 @@ def main():
                     if not lastElemLet:
                         #if the last command was an M or L, any non-explicit instru-
                         #ctions will be "L's" so we add that to the commands
-                        mySVG.commands.append('L')
+                        mySVG.addToList('L', 'command')
 
                     #split the element: before the comma is the x element, after is the y
                     tempx, tempy = mySVG.splitStrXY(element)
@@ -216,9 +271,9 @@ def main():
                         tempx += lastXCoord
                         tempy += lastYCoord
 
-                    #add the coordinates to teh corresponding arrays
-                    mySVG.xCoords.append(tempx)
-                    mySVG.yCoords.append(tempy)
+                    #add the coordinates to the corresponding arrays
+                    mySVG.addToList(tempx, 'x')
+                    mySVG.addToList(tempy, 'y')
 
                     #save the current x and y coordinates
                     lastXCoord = tempx
@@ -236,6 +291,7 @@ def main():
     print mySVG.xCoords
     print mySVG.yCoords
 
+'''
     #start talking to Arduino
     index = 0 #this index refers to the number command we're on as we iterate
               #through the arrays (command, xcoords, ycoords)
@@ -260,6 +316,6 @@ def main():
         index += 1
         readyByte = None
     mySVG.ser.close() #when you're done with everything, close the serial connection
-
+'''
 if __name__ == '__main__':
     main()
