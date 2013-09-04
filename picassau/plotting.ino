@@ -5,6 +5,11 @@ void plottingSetup()
   lengthL = INITIAL_LENGTH_L;
   lengthR = INITIAL_LENGTH_R;
   cCur = getCoord(lengthL, lengthR);
+  stepperL.step(1);
+  stepperR.step(1);
+  delay(MOTOR_DELAY);
+  stepperL.step(-1);
+  stepperR.step(-1);
   
 }
 
@@ -21,16 +26,16 @@ void moveToPoint( coord cD )
   coord cTempL;
   coord cTempR;
   
-  Serial.print("Start (");
-  Serial.print(cStart.x);
-  Serial.print(",");
-  Serial.print(cStart.y);
-  Serial.flush();
-  Serial.print("End (");
-  Serial.print(cD.x);
-  Serial.print(",");
-  Serial.print(cD.y);
-  Serial.flush();
+//  Serial.print("Start (");
+//  Serial.print(cStart.x);
+//  Serial.print(",");
+//  Serial.print(cStart.y);
+//  Serial.flush();
+//  Serial.print("End (");
+//  Serial.print(cD.x);
+//  Serial.print(",");
+//  Serial.print(cD.y);
+//  Serial.flush();
   
   while(1)
   {
@@ -51,6 +56,7 @@ void moveToPoint( coord cD )
         stateL = -1;
       }
     }
+    
     cTempR = getCoord( lengthL, lengthR+STEP_DIST );
     if (getDistFromPoint( cTempR, cD ) < curDist)
     {
@@ -76,7 +82,7 @@ void moveToPoint( coord cD )
         
         //Serial.print("L");
         //Serial.println(stateL);
-      } else //right move gets closer than left move
+      } else if (tempDR < tempDL)//right move gets closer than left move
       {
         stepperR.step( stateR ); //move +-1
         lengthR += stateR*STEP_DIST;
@@ -84,7 +90,15 @@ void moveToPoint( coord cD )
         
         //Serial.print("R");
         //Serial.println(stateR);
+      } else
+      {
+        stepperR.step( stateR );
+        stepperL.step( stateL );
+        lengthL += stateL*STEP_DIST;
+        lengthR += stateR*STEP_DIST;
+        cCur = getCoord( lengthL, lengthR);
       }
+        
     } else if (stateR != 0) //only right move gets closer
     {
       stepperR.step( stateR ); //move +-1
@@ -130,8 +144,11 @@ float getDistFromLine( coord line1, coord line2, coord point)
   float b = line2.x-line1.x;
   float c = -b*line1.y + a*line1.x;
   float num = a*point.x + b*point.y + c;
-  float d = abs(num)/(sqrt(a*a + b*b));
-  return d;
+  float d = num/(sqrt(a*a + b*b));
+  if (d>=0)
+    return d;
+  else
+    return -d;
 }
 
 float getDistFromPoint( coord p1, coord p2)

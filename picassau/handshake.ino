@@ -69,7 +69,7 @@ boolean parseInstruction()
     if ((++i) > 12) //allows a max of 10 digits
       return false; //too long
   }
-  cDest.x = temp;
+  cDest.x = temp + COORD_OFFSET_X;
   i++;
   temp = 0;
   while (stringBuffer[i] != '\n') //keep looping until you get to a comma
@@ -80,7 +80,7 @@ boolean parseInstruction()
     if ((++i) > 23) //allows a max of 10 digits
       return false; //too long
   }
-  cDest.y = temp;
+  cDest.y = temp + COORD_OFFSET_Y;
   return true;
 }
         
