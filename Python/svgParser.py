@@ -28,13 +28,13 @@ class svgParser:
         #these need to be floats, so include a decmial point
         self.canvasX = 22.0 #the dimension of the canvas in the x direction (in)
         self.canvasY = 28.0 #the dimension of the canvas in the y direction (in)
-        self.ardDist = (100/11.125) #how much the motor moves in one step
+        self.ardDist = (50/11.125) #how much the motor moves in one step
 
         self.fileWidth = 1 #default file width - found in svg file
         self.fileHeight = 1 #default file height - found in svg file
 
 
-#        self.ser = serial.Serial('COM5') #9600 Baud, 8 data bits, No parity, 1 stop bit
+        self.ser = serial.Serial('COM6') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
 
     def readInFile(self, file):
@@ -64,10 +64,10 @@ class svgParser:
                           doc.getElementsByTagName('svg')]
         self.fileHeight = [path.getAttribute('height') for path in
                        doc.getElementsByTagName('svg')]
-        self.scaleX = (self.canvasX/floa(self.fileWidth[0]))*self.ardDist
+        self.scaleX = (self.canvasX/float(self.fileWidth[0]))*self.ardDist
         self.scaleY = (self.canvasY/float(self.fileHeight[0]))*self.ardDist
         doc.unlink()
-        return pathStrings, self.fileWidth, self.fileHeight
+        return pathStrings
 
     def evalCurveEqtn(self, t, PArray):
         '''
@@ -127,7 +127,7 @@ class svgParser:
             self.yCoords.append(int((addition*self.scaleY)+0.5))
 
     def sendToArduino(self, i):
-        serOut =str(self.commands[i]) + ' ' + str(self.xCoords[i]) + ',' + str(self.yCoords[i] + '\n')
+        serOut = str(self.commands[i]) + ' ' + str(self.xCoords[i]) + ',' + str(self.yCoords[i]) + '\n'
         self.ser.write(serOut)
         return serOut
 
@@ -140,7 +140,7 @@ def main():
 
     mySVG = svgParser()
     #load in file - here I'm doing it manually
-    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\curvySVG2.svg"
+    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\demoCircle.svg"
 
     #N sets how many sections curves are divided into
     N = 10
@@ -168,7 +168,7 @@ def main():
 
     #read in the file and parse out the paths into an array of strings
     svgStr = mySVG.readInFile(file)
-    pathStrings, mySVG.fileWidth, mySVG.fileHeight = mySVG.parsePaths(svgStr)
+    pathStrings = mySVG.parsePaths(svgStr)
 
     #iteratively run through the paths, correct letters, and reorganize
     #into the different arrays
@@ -206,8 +206,10 @@ def main():
                     #if the letter is lowercase, change the lastCaseUp flag and add
                     #the uppercase version to the command array
                     if element.islower():
+                        element = str(element)
+                        element = element.upper()
                         lastCaseUp = False
-                        mySVG.addToList(element.upper, 'command')
+                        mySVG.addToList(element, 'command')
                     #if the letter isn't lowercase, change the flag and add the
                     #element to the commands
                     else:
@@ -291,7 +293,7 @@ def main():
     print mySVG.xCoords
     print mySVG.yCoords
 
-'''
+
     #start talking to Arduino
     index = 0 #this index refers to the number command we're on as we iterate
               #through the arrays (command, xcoords, ycoords)
@@ -302,6 +304,7 @@ def main():
 
         readyByte = mySVG.ser.read() #read 1 byte from Arduino
         while readyByte is not 'R':() #wait for the ready signal from the Arduino
+        print "got ready signal"
         serOut = mySVG.sendToArduino(index) #write the 3 arrays to the Arduino
         ardCheck = mySVG.readFromArduino() #read the check from the Arduino
         if '\n' in ardCheck: #sometimes the check is just a new line character
@@ -313,9 +316,12 @@ def main():
             ardCheck = mySVG.readFromArduino()
         mySVG.ser.write('G\n') #when you get the instructions to match, send out a
                                #go signal and wait for the Arduino to be ready again
+        print 'g'
         index += 1
         readyByte = None
+        print ardCheck
     mySVG.ser.close() #when you're done with everything, close the serial connection
-'''
+    print "done"
+
 if __name__ == '__main__':
     main()
