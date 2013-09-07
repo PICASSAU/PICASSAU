@@ -34,7 +34,7 @@ class svgParser:
         self.fileHeight = 1 #default file height - found in svg file
 
 
-        self.ser = serial.Serial('COM6') #9600 Baud, 8 data bits, No parity, 1 stop bit
+        #self.ser = serial.Serial('COM6') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
 
     def readInFile(self, file):
@@ -99,7 +99,8 @@ class svgParser:
         '''
         if str[0].islower:
             str = str[0].upper() + str[1:]
-        return str
+            upperFlag = False
+        return str, upperFlag
 
     def matchAny(self, lookingfor, element):
         '''
@@ -173,7 +174,9 @@ def main():
     #iteratively run through the paths, correct letters, and reorganize
     #into the different arrays
     for path in pathStrings:
-        path = mySVG.capFirstLetOnly(path) #we want to make sure the first letter is capitalized
+        path, lastCaseUp = mySVG.capFirstLetOnly(path)
+        #we want to make sure the first letter is capitalized and set the flag
+
         elements = path.split(' ') #split the elements based on spaces
         pathFirstCoordFlag = True #raise the falg to say it's the first coord of the path
 
@@ -212,7 +215,7 @@ def main():
                         mySVG.addToList(element, 'command')
                     #if the letter isn't lowercase, change the flag and add the
                     #element to the commands
-                    else:
+                    elif not pathFirstCoordFlag:
                         lastCaseUp = True
                         mySVG.addToList(element, 'command')
                     lastElemLet = True
@@ -249,13 +252,12 @@ def main():
                         #the last point on the curve is the last point given from the file
                         mySVG.addToList('L', 'command')
                         tempx = PXArray[3]
-                        tempy = PXArray[3]
-                        if lastComm is 'c': #again, if c is lowercase, it's relative
-                            tempx += PXArray[0]
-                            tempy += PYArray[0]
+                        tempy = PYArray[3]
                         mySVG.addToList(tempx, 'x')
                         mySVG.addToList(tempy, 'y')
                         Ccount = 0 #reset the count in case you have another curve
+                        PXArray = []
+                        PYArray = []
 
 
                 else:
@@ -270,30 +272,31 @@ def main():
                     #if the last case was lower, we need to translate relative coords
                     #to absolute by adding them to the previous absolute coordinates
                     if not lastCaseUp:
-                        tempx += lastXCoord
-                        tempy += lastYCoord
+                        if not pathFirstCoordFlag:
+                            tempx += lastXCoord
+                            tempy += lastYCoord
 
                     #add the coordinates to the corresponding arrays
                     mySVG.addToList(tempx, 'x')
                     mySVG.addToList(tempy, 'y')
 
-                    #save the current x and y coordinates
-                    lastXCoord = tempx
-                    lastYCoord = tempy
+                #save the current x and y coordinates
+                lastXCoord = tempx
+                lastYCoord = tempy
 
-                    #check to see if it's the first coordinate of the path
-                    if pathFirstCoordFlag:
-                        pathFirstXCoord = lastXCoord
-                        pathFirstYCoord = lastYCoord
-                        pathFirstCoordFlag = False
+                #check to see if it's the first coordinate of the path
+                if pathFirstCoordFlag:
+                    pathFirstXCoord = lastXCoord
+                    pathFirstYCoord = lastYCoord
+                    pathFirstCoordFlag = False
 
-                    lastElemLet = False
+                lastElemLet = False
 
     print mySVG.commands
     print mySVG.xCoords
     print mySVG.yCoords
 
-
+'''
     #start talking to Arduino
     index = 0 #this index refers to the number command we're on as we iterate
               #through the arrays (command, xcoords, ycoords)
@@ -322,6 +325,7 @@ def main():
         print ardCheck
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
+'''
 
 if __name__ == '__main__':
     main()
