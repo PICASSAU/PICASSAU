@@ -1,3 +1,14 @@
+//////////////////////////////////////////////////////////
+// handshake.ino
+// 
+// Made to handle the communication between the Arduino and the computer.
+//   Includes actual serial reading and writing, and parsing the received
+//   commands.
+//
+// Primary author(s): Drew Kerr, Ben Straub
+// Team members: David Toledo, Kayla Frost, Peter Gartland
+//////////////////////////////////////////////////////////
+
 char stringBuffer[25];
 byte stringIndex = 0;
 

@@ -1,3 +1,12 @@
+//////////////////////////////////////////////////////////
+// picassau.h
+// 
+// Header file for storing useful constants, pin numbers, structs, etc.
+//
+// Primary author(s): Ben Straub
+// Team members: David Toledo, Kayla Frost, Drew Kerr, Peter Gartland
+//////////////////////////////////////////////////////////
+
 #include "Arduino.h"
 
 typedef struct Coord { float x; float y; } coord;

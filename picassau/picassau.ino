@@ -1,3 +1,12 @@
+//////////////////////////////////////////////////////////
+// picassau.ino
+// 
+// Main file for PICASSAU.  Has the higher-level structure for what to do.
+//
+// Primary author(s): Ben Straub
+// Team members: David Toledo, Kayla Frost, Drew Kerr, Peter Gartland
+//////////////////////////////////////////////////////////
+
 #include "picassau.h"
 #include <Stepper.h>
 #include <Servo.h>
@@ -23,45 +32,44 @@ boolean brushWiggle = false;
 
 void setup()
 {
-  serialSetup();
-  plottingSetup();
-  brushSetup();
-  
-  //debug();
+  serialSetup();  //set up the serial stuff
+  plottingSetup(); //set up the stepper motors
+  brushSetup(); //set up the brushes
 }
 
 void loop()
 {
-  serialReady();
+  serialReady(); //let the comp know that you're ready
   do
   {
-    receiveInstruction();
-    if (!parseInstruction())
-      serialError();
-  } while (!verifyInstruction());
+    receiveInstruction(); //try to receive the instruction
+    if (!parseInstruction()) //try to parse
+      serialError(); //if there's an error, let the comp know
+  } while (!verifyInstruction()); //try to verify the instruction with the comp
   
-  if (command == 'M')
+  if (command == 'M') //is it a move (no painting)?
   {
     brushWiggle = false;
     removeBrush();
-    totalDist += getDistFromPoint(cCur, cDest);
+    totalDist += getDistFromPoint(cCur, cDest); //add this distance to total tally
   }
-  else if (command == 'L')
+  else if (command == 'L') //or is it a line (move with painting)?
   {
     applyBrush();
     brushWiggle = true;
     float tempDist = getDistFromPoint(cCur, cDest);
-    totalDist += tempDist;
-    brushDist += tempDist;
-    strokeDist += tempDist;
+    totalDist += tempDist; //add to total distance
+    brushDist += tempDist; // and total painted distance
+    strokeDist += tempDist; // and to the current stroke distance
     //if you will have painted too much, AND you've gone far enough
     if ((strokeDist > PAINTING_DISTANCE) && (strokeDist - tempDist > PAINTING_DISTANCE / 16))
       ;//dipBrush();
   }
     
-  moveToPoint(cDest);
+  moveToPoint(cDest); //and GO!
 }
 
+//I was using this to test stuff
 void debug()
 {
   applyBrush();

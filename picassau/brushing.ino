@@ -1,5 +1,16 @@
+//////////////////////////////////////////////////////////
+// brushing.ino
+// 
+// Made to control the servos moving the brush on the carriage.
+//
+// Primary author(s): Ben Straub
+// Team members: David Toledo, Kayla Frost, Drew Kerr, Peter Gartland
+//////////////////////////////////////////////////////////
 
 
+//////////////////////////////////////////////////////////
+////brushSetup
+///sets up the brush servos and calls the timer setup
 void brushSetup()
 {
   brushServo.attach(PIN_BRUSH_SERVO);
@@ -13,6 +24,9 @@ void brushSetup()
   initTimer();
 }
 
+//////////////////////////////////////////////////////////
+////initTimer
+///sets up the timer interrupt (used for brush wiggle)
 void initTimer()
 {
   cli();
@@ -27,7 +41,11 @@ void initTimer()
   sei();
 }
 
-/// ISR for the timer interrupt (2.404kHz)
+//////////////////////////////////////////////////////////
+////ISR
+///ISR for the timer interrupt (should be about 100Hz).
+///  It should move the brush between -5 and +5 degrees
+///  at a rate of about 5 full wiggles per second.
 ISR(TIMER2_COMPA_vect)
 {
   static boolean dir = true;
@@ -49,6 +67,10 @@ ISR(TIMER2_COMPA_vect)
 
 }
 
+
+//////////////////////////////////////////////////////////
+////applyBrush
+///applies the brush
 void applyBrush()
 {
   if (brushSetting != BPOS_APPLY)
@@ -57,7 +79,8 @@ void applyBrush()
     if ( interruptFlag )
       brushWiggle = false;
     
-    //slowly apply the brush
+    //slowly apply the brush to keep the carriage from bouncing
+    //off the poster
     for (int i = 40; i >= 0; i--)
     {
       brushServo.write(BPOS_APPLY+i);
@@ -72,6 +95,9 @@ void applyBrush()
   }
 }
 
+//////////////////////////////////////////////////////////
+////removeBrush
+///removes the brush
 void removeBrush()
 {
   brushServo.write(BPOS_LIFT);
@@ -81,6 +107,9 @@ void removeBrush()
   delay(100);
 }
 
+//////////////////////////////////////////////////////////
+////dipBrush
+///dips the brush into the paint
 void dipBrush()
 {
   brushWiggle = false;
