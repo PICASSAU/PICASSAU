@@ -28,13 +28,13 @@ class svgParser:
         #these need to be floats, so include a decmial point
         self.canvasX = 22.0 #the dimension of the canvas in the x direction (in)
         self.canvasY = 28.0 #the dimension of the canvas in the y direction (in)
-        self.ardDist = (50/11.125) #how much the motor moves in one step
+        self.ardDist = (100/11.125) #how much the motor moves in one step
 
         self.fileWidth = 1 #default file width - found in svg file
         self.fileHeight = 1 #default file height - found in svg file
 
 
-        #self.ser = serial.Serial('COM6') #9600 Baud, 8 data bits, No parity, 1 stop bit
+#        self.ser = serial.Serial('COM5') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
 
     def readInFile(self, file):
@@ -218,6 +218,8 @@ def main():
                     elif not pathFirstCoordFlag:
                         lastCaseUp = True
                         mySVG.addToList(element, 'command')
+                    else:
+                        mySVG.addToList(element, 'command')
                     lastElemLet = True
                     lastComm = 'mMlL'
 
@@ -323,6 +325,11 @@ def main():
         index += 1
         readyByte = None
         print ardCheck
+    mySVG.ser.write('D\n')
+    ardCheck = mySVG.readFromArduino()
+    while 'D' not in ardCheck:
+        ardCheck = mySVG.readFromArduion()
+    mySVG.ser.write('G\n')
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
 '''
