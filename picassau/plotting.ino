@@ -15,14 +15,22 @@ float lengthL, lengthR; //length from motor to platform
 ///sets up the stepper motors and plotting functions
 void plottingSetup()
 {
-  lengthL = INITIAL_LENGTH_L;
-  lengthR = INITIAL_LENGTH_R;
-  cCur = getCoord(lengthL, lengthR);
+//  lengthL = INITIAL_LENGTH_L;
+//  lengthR = INITIAL_LENGTH_R;
+//  cCur = getCoord(lengthL, lengthR);
+  cMotorL.x = MOTOR_L_X;
+  cMotorL.y = MOTOR_L_Y;
+  cMotorR.x = MOTOR_R_X;
+  cMotorR.y = MOTOR_R_Y;
+  
   stepperL.step(1);
   stepperR.step(1);
   delay(MOTOR_DELAY);
   stepperL.step(-1);
   stepperR.step(-1);
+  
+  if (!positionCalibration())
+    while(1);
   
 }
 
@@ -159,3 +167,80 @@ float getDistFromPoint( coord p1, coord p2)
   float dy = p1.y - p2.y;
   return sqrt(dx*dx + dy*dy);
 }
+
+//////////////////////////////////////////////////////////
+////positionCalibration
+///Calibrates the position of the carriage by moving the platform
+/// up until it gets detected by the IR sensor.
+///Returns false if it fails.
+boolean positionCalibration()
+{
+  
+  //step one: make sure that the carriage isn't already in front of the sensor
+  if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //if voltage is greater than threshold voltage
+    //aka if distance is less than threshold distance
+  {
+    for(int i = 0; i < DIP_STEPS; i++) //we're not dipping, but it's convenient to just go the same distance
+    {
+      stepperL.step(1);
+      stepperR.step(1);
+      delay(MOTOR_DELAY);
+    }
+    
+    //now check again:
+    if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD)
+      return false; //calibration fails if sensor is still picking something up.
+  }
+  
+  //ok, now we should be ready to start lifting the carriage
+  int count = 0;  //counts the steps moved upwards
+  int reading = 0; //will be used to store the sensor reading
+  while(1)
+  {
+    stepperL.step(-1); //pull both motors up a step
+    stepperR.step(-1);
+    delay(MOTOR_DELAY); //delay before reading sensor to give it time to finish moving
+    
+    
+    if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //have we found it?
+      break; //yes!
+      
+    if (++count >= MAX_CALIBRATION_STEPS) //have we moved too much (aka missed it?)
+    {  //if so, move back down to where you started, and report a failure
+      for(int i = 0; i < MAX_CALIBRATION_STEPS + CALIBRATION_Y_CORRECTION_STEPS; i++)
+      {
+        stepperL.step(1);
+        stepperR.step(1);
+        delay(MOTOR_DELAY);
+      }
+      return positionCalibration();
+    }
+  } //end while loop
+  
+  //at this point we have found the carriage, now we just need to convert that voltage
+  //reading into an x distance
+  
+  for(int i = 0; i < CALIBRATION_ADJUSTMENT_STEPS; i++)
+  {
+    stepperL.step(-1);
+    stepperR.step(-1);
+    delay(MOTOR_DELAY);
+  }
+  
+  reading = analogRead(PIN_IR_SENSOR);
+  //modeled using: 41.543 * (Voltage + 0.30221) ^ -1.5281,
+  //where voltage = reading * 5 / 1023
+  double distance = double(reading) + 61.8322; //intermediate step
+  distance = pow(distance,-1.5281); //another intermediate step
+  distance = 499642.2*distance; //ok, now it's really the distance (in steps)
+    //where 100steps/11.125 inches
+
+  cCur.x = IR_X + distance; //assumes it's mounted on the left side
+  cCur.y = IR_Y;
+  
+  lengthL = getDistFromPoint(cCur, cMotorL);
+  lengthR = getDistFromPoint(cCur, cMotorR);
+  
+  return true;
+} 
+  

@@ -19,8 +19,8 @@ float brushDist = 0;
 float totalDist = 0;
 float strokeDist = 0;
 
-Stepper stepperL(NSTEPS, 6,7,8,9);  
-Stepper stepperR(NSTEPS, 10,11,12,13); 
+Stepper stepperL(NSTEPS, PIN_STEP_L[0], PIN_STEP_L[1], PIN_STEP_L[2], PIN_STEP_L[3]);  
+Stepper stepperR(NSTEPS, PIN_STEP_R[0], PIN_STEP_R[1], PIN_STEP_R[2], PIN_STEP_R[3]); 
 
 Servo brushServo;
 Servo rotateServo;
@@ -35,6 +35,7 @@ void setup()
   serialSetup();  //set up the serial stuff
   plottingSetup(); //set up the stepper motors
   brushSetup(); //set up the brushes
+  debug();
 }
 
 void loop()
@@ -72,52 +73,37 @@ void loop()
 //I was using this to test stuff
 void debug()
 {
-  applyBrush();
-  rotateBrush(0);
-  while(1)
-  {
-    //BRUSH POSITIONS
-//    Serial.println("applying");
-//    applyBrush();
-//    delay(2000);
-//    Serial.println("removing");
-//    removeBrush();
-//    delay(2000);
-//    //dipBrush();
-//    Serial.println("dipping");
-//    brushServo.write(BPOS_DIP);
-//    delay(2000);
+  Serial.println("DEBUGGING...");
+//  while(1)
+//  {
+//    int reading = analogRead(PIN_IR_SENSOR);
+//    Serial.print(reading);
+//    double distance = double(reading) + 61.8322; //intermediate step
+//    distance = pow(distance,-1.5281); //another intermediate step
+//    distance = 141186.4*distance/2.54; //ok, now it's really the distance
+//    Serial.print(" :\t");
+//    Serial.println(distance);
+//    delay(1000);
+//  }
+  
 
-    //BRUSH ROTATION
-//    for(int i = 0; i <= 150; i++)
-//    {
-//      rotateBrush(i);
-//      delay(10);
-//    }
-//    delay(500);
-//    for(int i = 150; i >= 0; i--)
-//    {
-//      rotateBrush(i);
-//      delay(10);
-//    }
-
-//    for (int i = -5; i <= 5; i++)
-//    {
-//      brushServo.write(BPOS_APPLY + i);
-//      delay(10);
-//    }
-//    for (int i = 5; i >= -5; i--)
-//    {
-//      brushServo.write(BPOS_APPLY + i);
-//      delay(10);
-//    }
-
-    brushWiggle = true;
-    delay(5000);
-    brushWiggle = false;
-    delay(2000);
-
-  }
+//  if (positionCalibration())
+//    Serial.println("success!");
+//  else
+//    Serial.println("FAIL.");
+//    
+//  Serial.print("absolute coord: (");
+//  Serial.print(cCur.x);
+//  Serial.print(", ");
+//  Serial.print(cCur.y);
+//  Serial.print(")\ncanvas coord: (");
+//  Serial.print(cCur.x-COORD_OFFSET_X);
+//  Serial.print(", ");
+//  Serial.println(cCur.y-COORD_OFFSET_Y);
+  
+  dipBrush();
+  
+  while(1);
 }
   
 
