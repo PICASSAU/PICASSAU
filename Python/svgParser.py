@@ -34,7 +34,7 @@ class svgParser:
         self.fileHeight = 1 #default file height - found in svg file
 
 
-#        self.ser = serial.Serial('COM5') #9600 Baud, 8 data bits, No parity, 1 stop bit
+        self.ser = serial.Serial('COM6') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
 
     def readInFile(self, file):
@@ -141,7 +141,7 @@ def main():
 
     mySVG = svgParser()
     #load in file - here I'm doing it manually
-    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\demoCircle.svg"
+    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\demoCircle2.svg"
 
     #N sets how many sections curves are divided into
     N = 10
@@ -298,7 +298,7 @@ def main():
     print mySVG.xCoords
     print mySVG.yCoords
 
-'''
+
     #start talking to Arduino
     index = 0 #this index refers to the number command we're on as we iterate
               #through the arrays (command, xcoords, ycoords)
@@ -321,18 +321,19 @@ def main():
             ardCheck = mySVG.readFromArduino()
         mySVG.ser.write('G\n') #when you get the instructions to match, send out a
                                #go signal and wait for the Arduino to be ready again
-        print 'g'
+        print 'G'
         index += 1
         readyByte = None
         print ardCheck
     mySVG.ser.write('D\n')
     ardCheck = mySVG.readFromArduino()
     while 'D' not in ardCheck:
-        ardCheck = mySVG.readFromArduion()
+        ardCheck = mySVG.readFromArduino()
+        mySVG.ser.write('D\n')
     mySVG.ser.write('G\n')
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
-'''
+
 
 if __name__ == '__main__':
     main()
