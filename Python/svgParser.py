@@ -20,9 +20,20 @@ class svgParser:
     def __init__(self):
 
         #instantiate some arrays we'll use
-        self.commands = []
-        self.xCoords = []
-        self.yCoords = []
+        self.commands0 = []
+        self.xCoords0 = []
+        self.yCoords0 = []
+
+        self.commands1 = []
+        self.xCoords1 = []
+        self.yCoords1 = []
+
+        self.commands2 = []
+        self.xCoords2 = []
+        self.yCoords2 = []
+
+        self.grabbedColors = []
+        self.colors= []
 
         #use these variables to scale the instructions for the Arduino
         #these need to be floats, so include a decmial point
@@ -33,8 +44,7 @@ class svgParser:
         self.fileWidth = 1 #default file width - found in svg file
         self.fileHeight = 1 #default file height - found in svg file
 
-
-        self.ser = serial.Serial('COM6') #9600 Baud, 8 data bits, No parity, 1 stop bit
+        #self.ser = serial.Serial('COM6') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
 
     def readInFile(self, file):
@@ -63,9 +73,11 @@ class svgParser:
         self.fileWidth = [path.getAttribute('width') for path in
                           doc.getElementsByTagName('svg')]
         self.fileHeight = [path.getAttribute('height') for path in
-                       doc.getElementsByTagName('svg')]
+                           doc.getElementsByTagName('svg')]
         self.scaleX = (self.canvasX/float(self.fileWidth[0]))*self.ardDist
         self.scaleY = (self.canvasY/float(self.fileHeight[0]))*self.ardDist
+        self.grabbedColors = [path.getAttribute('stroke') for path in
+                              doc.getElementsByTagName('path')]
         doc.unlink()
         return pathStrings
 
@@ -111,7 +123,7 @@ class svgParser:
         lookingfor = '[' + lookingfor + ']'
         return re.match(lookingfor, element)
 
-    def addToList(self, addition, listName):
+    def addToList(self, addition, listName, colorNum):
         '''
         Given the addition, this function will add it to the appropriate list,
         given as a string (all lowercase).
@@ -120,15 +132,41 @@ class svgParser:
         'y' = the y array
 
         '''
-        if listName is 'command': #if the addition is a command...
-            self.commands.append(addition)
-        elif listName is 'x': #else if the addition is an x coordinate...
-            self.xCoords.append(int((addition*self.scaleX)+0.5))
-        else: #hopefully the addtion is a y coordinate...
-            self.yCoords.append(int((addition*self.scaleY)+0.5))
+        if colorNum == 0:
+            if listName is 'command': #if the addition is a command...
+                self.commands0.append(addition)
+            elif listName is 'x': #else if the addition is an x coordinate...
+                self.xCoords0.append(int((addition*self.scaleX)+0.5))
+            else: #hopefully the addtion is a y coordinate...
+                self.yCoords0.append(int((addition*self.scaleY)+0.5))
+        elif colorNum == 1:
+            if listName is 'command': #if the addition is a command...
+                self.commands1.append(addition)
+            elif listName is 'x': #else if the addition is an x coordinate...
+                self.xCoords1.append(int((addition*self.scaleX)+0.5))
+            else: #hopefully the addtion is a y coordinate...
+                self.yCoords1.append(int((addition*self.scaleY)+0.5))
+        elif colorNum == 2:
+            if listName is 'command': #if the addition is a command...
+                self.commands2.append(addition)
+            elif listName is 'x': #else if the addition is an x coordinate...
+                self.xCoords2.append(int((addition*self.scaleX)+0.5))
+            else: #hopefully the addtion is a y coordinate...
+                self.yCoords2.append(int((addition*self.scaleY)+0.5))
+        return
 
-    def sendToArduino(self, i):
-        serOut = str(self.commands[i]) + ' ' + str(self.xCoords[i]) + ',' + str(self.yCoords[i]) + '\n'
+    def sendToArduino0(self, i):
+        serOut = str(self.commands0[i]) + ' ' + str(self.xCoords0[i]) + ',' + str(self.yCoords0[i]) + '\n'
+        self.ser.write(serOut)
+        return serOut
+
+    def sendToArduino1(self, i):
+        serOut = str(self.commands1[i]) + ' ' + str(self.xCoords1[i]) + ',' + str(self.yCoords1[i]) + '\n'
+        self.ser.write(serOut)
+        return serOut
+
+    def sendToArduino2(self, i):
+        serOut = str(self.commands2[i]) + ' ' + str(self.xCoords2[i]) + ',' + str(self.yCoords2[i]) + '\n'
         self.ser.write(serOut)
         return serOut
 
@@ -141,13 +179,15 @@ def main():
 
     mySVG = svgParser()
     #load in file - here I'm doing it manually
-    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\demoCircle2.svg"
+    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\colorSVG.svg"
 
     #N sets how many sections curves are divided into
     N = 10
     Ccount = 0
     PXArray = []
     PYArray = []
+    currentColor = 0
+    currentColorIndex = 0
 
     #instantiate some flags
 
@@ -174,6 +214,15 @@ def main():
     #iteratively run through the paths, correct letters, and reorganize
     #into the different arrays
     for path in pathStrings:
+
+        #Find the corresponding color for this path by checking grabbedColors
+        #compare this color to the colors array, which contains each color only
+        #once.  If the grabbed color isn't there, add it to the colors list.
+        currentColor = mySVG.grabbedColors[pathStrings.index(path)]
+        if currentColor not in mySVG.colors:
+            mySVG.colors.append(currentColor)
+        currentColorIndex = mySVG.colors.index(currentColor)
+
         path, lastCaseUp = mySVG.capFirstLetOnly(path)
         #we want to make sure the first letter is capitalized and set the flag
 
@@ -189,9 +238,9 @@ def main():
                    #back to the first coordinate of the path.  To do this, add a
                    #"L" to the command array, and put the initial x and y coords
                    #into the x and y arrays.
-                   mySVG.addToList('L', 'command')
-                   mySVG.addToList(pathFirstXCoord, 'x')
-                   mySVG.addToList(pathFirstYCoord, 'y')
+                   mySVG.addToList('L', 'command', currentColorIndex)
+                   mySVG.addToList(pathFirstXCoord, 'x', currentColorIndex)
+                   mySVG.addToList(pathFirstYCoord, 'y', currentColorIndex)
                    lastElemLet = True
                    lastComm = 'zZ'
 
@@ -212,14 +261,14 @@ def main():
                         element = str(element)
                         element = element.upper()
                         lastCaseUp = False
-                        mySVG.addToList(element, 'command')
+                        mySVG.addToList(element, 'command', currentColorIndex)
                     #if the letter isn't lowercase, change the flag and add the
                     #element to the commands
                     elif not pathFirstCoordFlag:
                         lastCaseUp = True
-                        mySVG.addToList(element, 'command')
+                        mySVG.addToList(element, 'command', currentColorIndex)
                     else:
-                        mySVG.addToList(element, 'command')
+                        mySVG.addToList(element, 'command', currentColorIndex)
                     lastElemLet = True
                     lastComm = 'mMlL'
 
@@ -247,16 +296,19 @@ def main():
 
                         #Actual Points = P(i/N), so iteratively solve for these
                         for i in range(N):
-                            mySVG.addToList('L', 'command') #each move requires drawing a line
-                            mySVG.addToList(int(mySVG.evalCurveEqtn((float(i)/N), PXArray)), 'x')
-                            mySVG.addToList(int(mySVG.evalCurveEqtn((float(i)/N), PYArray)), 'y')
+                            #each move requires drawing a line
+                            mySVG.addToList('L', 'command', currentColorIndex)
+                            mySVG.addToList(int(mySVG.evalCurveEqtn((float(i)/N),
+                                            PXArray)), 'x', currentColorIndex)
+                            mySVG.addToList(int(mySVG.evalCurveEqtn((float(i)/N),
+                                            PYArray)), 'y', currentColorIndex)
 
                         #the last point on the curve is the last point given from the file
-                        mySVG.addToList('L', 'command')
+                        mySVG.addToList('L', 'command', currentColorIndex)
                         tempx = PXArray[3]
                         tempy = PYArray[3]
-                        mySVG.addToList(tempx, 'x')
-                        mySVG.addToList(tempy, 'y')
+                        mySVG.addToList(tempx, 'x', currentColorIndex)
+                        mySVG.addToList(tempy, 'y', currentColorIndex)
                         Ccount = 0 #reset the count in case you have another curve
                         PXArray = []
                         PYArray = []
@@ -266,7 +318,7 @@ def main():
                     if not lastElemLet:
                         #if the last command was an M or L, any non-explicit instru-
                         #ctions will be "L's" so we add that to the commands
-                        mySVG.addToList('L', 'command')
+                        mySVG.addToList('L', 'command', currentColorIndex)
 
                     #split the element: before the comma is the x element, after is the y
                     tempx, tempy = mySVG.splitStrXY(element)
@@ -279,8 +331,8 @@ def main():
                             tempy += lastYCoord
 
                     #add the coordinates to the corresponding arrays
-                    mySVG.addToList(tempx, 'x')
-                    mySVG.addToList(tempy, 'y')
+                    mySVG.addToList(tempx, 'x', currentColorIndex)
+                    mySVG.addToList(tempy, 'y', currentColorIndex)
 
                 #save the current x and y coordinates
                 lastXCoord = tempx
@@ -294,15 +346,30 @@ def main():
 
                 lastElemLet = False
 
-    print mySVG.commands
-    print mySVG.xCoords
-    print mySVG.yCoords
+    print mySVG.commands0
+    print mySVG.xCoords0
+    print mySVG.yCoords0
+    print "\n"
+
+    print mySVG.commands1
+    print mySVG.xCoords1
+    print mySVG.yCoords1
+    print "\n"
+
+    print mySVG.commands2
+    print mySVG.xCoords2
+    print mySVG.yCoords2
+    print "\n"
 
 
+
+'''
     #start talking to Arduino
+
+    #Color 0
     index = 0 #this index refers to the number command we're on as we iterate
               #through the arrays (command, xcoords, ycoords)
-    for eachComm in mySVG.commands: #for each command...
+    for eachComm in mySVG.commands0: #for each command...
         #reset the output and check variables
         serOut = None
         ardCheck = None
@@ -317,7 +384,7 @@ def main():
             ardCheck = mySVG.readFromArduino()
         while(serOut not in ardCheck): #we're looking for our output to match the check
                                        #so keep sending/reading until they match
-            serOut = mySVG.sendToArduino(index)
+            serOut = mySVG.sendToArduino0(index)
             ardCheck = mySVG.readFromArduino()
         mySVG.ser.write('G\n') #when you get the instructions to match, send out a
                                #go signal and wait for the Arduino to be ready again
@@ -325,6 +392,61 @@ def main():
         index += 1
         readyByte = None
         print ardCheck
+
+    #Color 1
+    index = 0 #this index refers to the number command we're on as we iterate
+              #through the arrays (command, xcoords, ycoords)
+    for eachComm in mySVG.commands0: #for each command...
+        #reset the output and check variables
+        serOut = None
+        ardCheck = None
+
+        readyByte = mySVG.ser.read() #read 1 byte from Arduino
+        while readyByte is not 'R':() #wait for the ready signal from the Arduino
+        print "got ready signal"
+        serOut = mySVG.sendToArduino(index) #write the 3 arrays to the Arduino
+        ardCheck = mySVG.readFromArduino() #read the check from the Arduino
+        if '\n' in ardCheck: #sometimes the check is just a new line character
+                             #if this is the case, read it again
+            ardCheck = mySVG.readFromArduino()
+        while(serOut not in ardCheck): #we're looking for our output to match the check
+                                       #so keep sending/reading until they match
+            serOut = mySVG.sendToArduino1(index)
+            ardCheck = mySVG.readFromArduino()
+        mySVG.ser.write('G\n') #when you get the instructions to match, send out a
+                               #go signal and wait for the Arduino to be ready again
+        print 'G'
+        index += 1
+        readyByte = None
+        print ardCheck
+
+    #Color 2
+    index = 0 #this index refers to the number command we're on as we iterate
+              #through the arrays (command, xcoords, ycoords)
+    for eachComm in mySVG.commands0: #for each command...
+        #reset the output and check variables
+        serOut = None
+        ardCheck = None
+
+        readyByte = mySVG.ser.read() #read 1 byte from Arduino
+        while readyByte is not 'R':() #wait for the ready signal from the Arduino
+        print "got ready signal"
+        serOut = mySVG.sendToArduino(index) #write the 3 arrays to the Arduino
+        ardCheck = mySVG.readFromArduino() #read the check from the Arduino
+        if '\n' in ardCheck: #sometimes the check is just a new line character
+                             #if this is the case, read it again
+            ardCheck = mySVG.readFromArduino()
+        while(serOut not in ardCheck): #we're looking for our output to match the check
+                                       #so keep sending/reading until they match
+            serOut = mySVG.sendToArduino2(index)
+            ardCheck = mySVG.readFromArduino()
+        mySVG.ser.write('G\n') #when you get the instructions to match, send out a
+                               #go signal and wait for the Arduino to be ready again
+        print 'G'
+        index += 1
+        readyByte = None
+        print ardCheck
+
     mySVG.ser.write('D\n')
     ardCheck = mySVG.readFromArduino()
     while 'D' not in ardCheck:
@@ -333,6 +455,7 @@ def main():
     mySVG.ser.write('G\n')
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
+    '''
 
 
 if __name__ == '__main__':
