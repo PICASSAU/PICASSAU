@@ -20,17 +20,17 @@ class svgParser:
     def __init__(self):
 
         #instantiate some arrays we'll use
-        self.commands0 = []
-        self.xCoords0 = []
-        self.yCoords0 = []
+        self.commands0 = ['C']
+        self.xCoords0 = [0]
+        self.yCoords0 = [0]
 
-        self.commands1 = []
-        self.xCoords1 = []
-        self.yCoords1 = []
+        self.commands1 = ['C']
+        self.xCoords1 = [1]
+        self.yCoords1 = [0]
 
-        self.commands2 = []
-        self.xCoords2 = []
-        self.yCoords2 = []
+        self.commands2 = ['C']
+        self.xCoords2 = [2]
+        self.yCoords2 = [0]
 
         self.grabbedColors = []
         self.colors= []
