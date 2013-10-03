@@ -23,14 +23,19 @@ void plottingSetup()
   cMotorR.x = MOTOR_R_X;
   cMotorR.y = MOTOR_R_Y;
   
-  stepperL.step(1);
-  stepperR.step(1);
-  delay(MOTOR_DELAY);
-  stepperL.step(-1);
-  stepperR.step(-1);
+  pinMode( PIN_MOTOR_L_STEP, OUTPUT );
+  pinMode( PIN_MOTOR_R_STEP, OUTPUT );
+  pinMode( PIN_MOTOR_L_DIR, OUTPUT );
+  pinMode( PIN_MOTOR_R_DIR, OUTPUT );
   
-  if (!positionCalibration())
-    while(1);
+  motorLStep(1);
+  motorRStep(1);
+  delay(MOTOR_DELAY);
+  motorLStep(-1);
+  motorRStep(-1);
+  
+//  if (!positionCalibration())
+//    while(1);
   
 }
 
@@ -47,8 +52,10 @@ void moveToPoint( coord cD )
   
   float tempDL; //temporary holding variable for the distance from line for a left motor move
   float tempDR; //ditto but for right motor move
+  float tempDB; //ditto but for moving both
   coord cTempL; //temp variable for holding the coordinates of a left motor move
   coord cTempR; //ditto for right
+  coord cTempB; //both
   
   while(1) //loop infinitely (until arriving at cD 
   {
@@ -88,39 +95,46 @@ void moveToPoint( coord cD )
       }
     }
     
+    
     //ok, now let's see which move is better
     if ((stateR != 0) && (stateL != 0)) //means that moving either motor will get us closer to the destination
     {
-      if (tempDL < tempDR) //if left move gets closer than right move
+      
+      cTempB = getCoord( lengthL+stateL*STEP_DIST, lengthR+stateR*STEP_DIST);
+      tempDB = getDistFromLine( cStart, cD, cTempB );
+      
+      
+      if ((tempDL < tempDR) && (tempDL < tempDB)) //if left move gets closer than right move or both moves
       {
-        stepperL.step( stateL ); //move +-1
+        motorLStep( stateL ); //move +-1
         lengthL += stateL*STEP_DIST; // change by +- STEP DIST
         cCur = cTempL; //update the current coordinates
         
-      } else if (tempDR < tempDL)//right move gets closer than left move
+      } else if ((tempDR < tempDL) && (tempDR < tempDB)) //right move gets closer than left move or both moves
       {
-        stepperR.step( stateR ); //move +-1
+        motorRStep( stateR ); //move +-1
         lengthR += stateR*STEP_DIST; // change by +- STEP DIST
         cCur = cTempR; //update the current coordinates
         
-      } else  //otherwise they're exactly the same? (unlikely)
+      } else  //otherwise both moves gets closest (or they're tied)
       {
-        stepperR.step( stateR ); //move both
-        stepperL.step( stateL );
+        motorRStep( stateR ); //move both
+        motorLStep( stateL );
         lengthL += stateL*STEP_DIST;
         lengthR += stateR*STEP_DIST;
+        cCur = 
         cCur = getCoord( lengthL, lengthR);
       }
         
     } else if (stateR != 0) //only right move gets closer
     {
-      stepperR.step( stateR ); //move +-1
+      motorRStep( stateR ); //move +-1
       lengthR += stateR*STEP_DIST;
       cCur = cTempR;
       
     } else if (stateL != 0) //only left move gets closer
     {
-      stepperL.step( stateL ); //move +-1
+      motorLStep( stateL ); //move +-1
       lengthL += stateL*STEP_DIST;
       cCur = cTempL;
       
@@ -180,16 +194,16 @@ boolean positionCalibration()
   if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //if voltage is greater than threshold voltage
     //aka if distance is less than threshold distance
   {
-    for(int i = 0; i < DIP_STEPS; i++) //we're not dipping, but it's convenient to just go the same distance
+    for(int i = 0; i < 2*DIP_STEPS; i++) //we're not dipping, but it's convenient to just go the same distance
     {
-      stepperL.step(1);
-      stepperR.step(1);
+      motorLStep(1);
+      motorRStep(1);
       delay(MOTOR_DELAY);
     }
-    
+    delay(1000);
     //now check again:
-    if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD)
-      return false; //calibration fails if sensor is still picking something up.
+//    if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD)
+//      return false; //calibration fails if sensor is still picking something up.
   }
   
   //ok, now we should be ready to start lifting the carriage
@@ -197,8 +211,8 @@ boolean positionCalibration()
   int reading = 0; //will be used to store the sensor reading
   while(1)
   {
-    stepperL.step(-1); //pull both motors up a step
-    stepperR.step(-1);
+    motorLStep(-1); //pull both motors up a step
+    motorRStep(-1);
     delay(MOTOR_DELAY); //delay before reading sensor to give it time to finish moving
     
     
@@ -209,8 +223,8 @@ boolean positionCalibration()
     {  //if so, move back down to where you started, and report a failure
       for(int i = 0; i < MAX_CALIBRATION_STEPS + CALIBRATION_Y_CORRECTION_STEPS; i++)
       {
-        stepperL.step(1);
-        stepperR.step(1);
+        motorLStep(1);
+        motorRStep(1);
         delay(MOTOR_DELAY);
       }
       return positionCalibration();
@@ -222,17 +236,21 @@ boolean positionCalibration()
   
   for(int i = 0; i < CALIBRATION_ADJUSTMENT_STEPS; i++)
   {
-    stepperL.step(-1);
-    stepperR.step(-1);
+    motorLStep(-1);
+    motorRStep(-1);
     delay(MOTOR_DELAY);
   }
   
   reading = analogRead(PIN_IR_SENSOR);
   //modeled using: 41.543 * (Voltage + 0.30221) ^ -1.5281,
   //where voltage = reading * 5 / 1023
-  double distance = double(reading) + 61.8322; //intermediate step
-  distance = pow(distance,-1.5281); //another intermediate step
-  distance = 499642.2*distance; //ok, now it's really the distance (in steps)
+  
+  double distance = pow(double(reading),-1.198);
+    distance = distance * 62930.3;
+  
+//  double distance = double(reading) + 61.8322; //intermediate step
+//  distance = pow(distance,-1.5281); //another intermediate step
+//  distance = 499642.2*distance; //ok, now it's really the distance (in steps)
     //where 100steps/11.125 inches
 
   cCur.x = IR_X + distance; //assumes it's mounted on the left side
@@ -240,6 +258,15 @@ boolean positionCalibration()
   
   lengthL = getDistFromPoint(cCur, cMotorL);
   lengthR = getDistFromPoint(cCur, cMotorR);
+  
+  if ((cCur.x > 5) || (cCur.x < 3.5))
+  {
+    coord cAdjust;
+    cAdjust.x = 4;
+    cAdjust.y = IR_Y;
+    moveToPoint(cAdjust);
+    return positionCalibration();
+  }
   
   return true;
 } 

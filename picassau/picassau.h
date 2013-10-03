@@ -47,6 +47,8 @@ const float PAINT_X = 148;
 const float PAINT_Y = 413;
 coord cPaint;
 
+const int DIP_STEPS = 49; //number of steps down from cPaint to move to dip brush
+
 const float MOTOR_L_X = 0;
 const float MOTOR_L_Y = 0;
 coord cMotorL;
@@ -54,16 +56,16 @@ const float MOTOR_R_X = MOTOR_DIST;
 const float MOTOR_R_Y = 0;
 coord cMotorR;
 
+const long SERIAL_TIMEOUT = 1000; //serial time out in ms (aka how long to wait before sending another 'R')
 
-
-
-
-
-const int DIP_STEPS = 49; //number of steps down from cPaint to move to dip brush
 
 const int PIN_BRUSH_SERVO = 2;
 const int PIN_ROTATE_SERVO = 3;
-const int PIN_STEP_L[4] = {6,7,8,9};
-const int PIN_STEP_R[4] = {10,11,12,13};
+//const int PIN_STEP_L[4] = {6,7,8,9};
+//const int PIN_STEP_R[4] = {10,11,12,13};
+const int PIN_MOTOR_L_STEP = 11;
+const int PIN_MOTOR_L_DIR = 10;
+const int PIN_MOTOR_R_STEP = 12;
+const int PIN_MOTOR_R_DIR = 13;
 const int PIN_IR_SENSOR = A0;
 

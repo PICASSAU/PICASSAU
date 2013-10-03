@@ -131,8 +131,8 @@ void dipBrush()
   
   for(int i = 0; i < DIP_STEPS; i++)
   {
-    stepperL.step(1);
-    stepperR.step(1);
+    motorLStep(1);
+    motorRStep(1);
     delay(MOTOR_DELAY);
   }
   
@@ -149,8 +149,8 @@ void dipBrush()
   
   for(int i = 0; i < DIP_STEPS; i++)
   {
-    stepperL.step(-1);
-    stepperR.step(-1);
+    motorLStep(-1);
+    motorRStep(-1);
     delay(MOTOR_DELAY);
   }
   

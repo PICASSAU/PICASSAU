@@ -32,14 +32,19 @@ void serialError()
   Serial.print("X");  //error in reading message
 }
     
-void receiveInstruction() //receive instruction from computer
+boolean receiveInstruction() //receive instruction from computer
 {
+  long t = millis();
   //Serial.println("receiving");
   char temp;
   //Serial.println(stringBuffer);
   do
   {
-    while (!Serial.available()) {};  //wait until data in serial buffer
+    while (!Serial.available()) //wait until data in serial buffer
+    {
+      if ((millis()-t) > SERIAL_TIMEOUT)
+        return false;
+    }
     temp = Serial.read();   //write buffer data into string
     Serial.print(temp);
     stringBuffer[stringIndex++] = temp;
@@ -47,6 +52,7 @@ void receiveInstruction() //receive instruction from computer
   stringBuffer[stringIndex] = '\0';
   //Serial.print(stringBuffer[0]);
   //Serial.print(stringBuffer);
+  return true;
 }
     
 boolean verifyInstruction()  //check if correct instr. received with computer and parse numbers out
@@ -65,6 +71,8 @@ boolean verifyInstruction()  //check if correct instr. received with computer an
 boolean parseInstruction()
 {
   command = stringBuffer[0];
+  if (command == 'D') //D for Done
+    return true;
   if ((command != 'L') && (command != 'M'))
     return false;
   if (stringBuffer[1] != ' ')
