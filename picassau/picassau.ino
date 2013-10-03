@@ -93,60 +93,7 @@ void loop()
 //I was using this to test stuff
 void debug()
 {
-//  Serial.println("DEBUGGING...");
-//  while(1)
-//  {
-//    int reading = analogRead(PIN_IR_SENSOR);
-//    Serial.print(reading);
-//    
-//    double distance = pow(double(reading),-1.198);
-//    distance = distance * 62930.3;
-////    double distance = double(reading) + 61.8322; //intermediate step
-////    distance = pow(distance,-1.5281); //another intermediate step
-////    distance = 141186.4*distance/2.54; //ok, now it's really the distance
-//    Serial.print(" :\t");
-//    Serial.println(distance);
-//    delay(1000);
-//  }
-  
-
-//  if (positionCalibration())
-//    Serial.println("success!");
-//  else
-//    Serial.println("FAIL.");
-//    
-//  Serial.print("absolute coord: (");
-//  Serial.print(cCur.x);
-//  Serial.print(", ");
-//  Serial.print(cCur.y);
-//  Serial.print(")\ncanvas coord: (");
-//  Serial.print(cCur.x-COORD_OFFSET_X);
-//  Serial.print(", ");
-//  Serial.println(cCur.y-COORD_OFFSET_Y);
-  
-//  dipBrush();
-
-  for (int i = 0; i < 30; i++)
-  {
-      motorLStep(1);
-      delay(500);
-  }
-  for (int i = 0; i < 30; i++)
-  {
-      motorRStep(1);
-      delay(500);
-  }
-  for (int i = 0; i < 30; i++)
-  {
-      motorLStep(-1);
-      delay(500);
-  }
-  for (int i = 0; i < 30; i++)
-  {
-      motorRStep(-1);
-      delay(500);
-  }
-  
+  Serial.println("asdlfkjhsa;glknsa;lgkasf");
   while(1)
   {
     motorLStep(200);
@@ -154,8 +101,7 @@ void debug()
     motorLStep(-200);
     motorRStep(-200);
   }
-
-    
+   
 }
   
 

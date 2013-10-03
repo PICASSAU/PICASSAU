@@ -118,13 +118,13 @@ void dipBrush()
   coord cReturn = cCur;
   
   delay(1000);
-  Serial.println("moving to paint coordinates...");
+  //Serial.println("moving to paint coordinates...");
   delay(1000);
   
-  moveToPoint(cPaint);
+  moveToPoint(cPaint2);
   
   delay(1000);
-  Serial.println("dipping...");
+  //Serial.println("dipping...");
   delay(1000);
   
   for(int i = 0; i < DIP_STEPS; i++)
@@ -135,7 +135,7 @@ void dipBrush()
   }
   
   delay(1000);
-  Serial.println("wiggling...");
+  //Serial.println("wiggling...");
   
   brushWiggle = true;
   delay(1000);

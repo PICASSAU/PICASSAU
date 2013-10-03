@@ -30,8 +30,8 @@ void plottingSetup()
   motorLStep(-1);
   motorRStep(-1);
   
-//  if (!positionCalibration())
-//    while(1);
+  if (!positionCalibration())
+    while(1);
   
 }
 
@@ -40,6 +40,7 @@ void plottingSetup()
 ///moves from the current coordinates to destination cD.
 void moveToPoint( coord cD )
 {
+  Serial.println("moving");
   long t = millis(); //used to time motor delays / speed
   coord cStart = cCur; //start point
   float curDist;
@@ -190,7 +191,9 @@ boolean positionCalibration()
   if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //if voltage is greater than threshold voltage
     //aka if distance is less than threshold distance
   {
-    for(int i = 0; i < 2*DIP_STEPS; i++) //we're not dipping, but it's convenient to just go the same distance
+    Serial.println("saw it early");
+    delay(500);
+    for(int i = 0; i < DIP_STEPS; i++) //we're not dipping, but it's convenient to just go the same distance
     {
       motorLStep(1);
       motorRStep(1);
@@ -205,6 +208,8 @@ boolean positionCalibration()
   //ok, now we should be ready to start lifting the carriage
   int count = 0;  //counts the steps moved upwards
   int reading = 0; //will be used to store the sensor reading
+  Serial.println("scanning...");
+    delay(500);
   while(1)
   {
     motorLStep(-1); //pull both motors up a step
@@ -227,6 +232,8 @@ boolean positionCalibration()
     }
   } //end while loop
   
+  Serial.println("found it");
+    delay(500);
   //at this point we have found the carriage, now we just need to convert that voltage
   //reading into an x distance
   
@@ -237,12 +244,17 @@ boolean positionCalibration()
     delay(MOTOR_DELAY);
   }
   
+  Serial.println("reading");
+    delay(500);
   reading = analogRead(PIN_IR_SENSOR);
   //modeled using: 41.543 * (Voltage + 0.30221) ^ -1.5281,
   //where voltage = reading * 5 / 1023
   
   double distance = pow(double(reading),-1.198);
-    distance = distance * 62930.3;
+    distance = distance * 169721.1;//62930.3;
+  Serial.print("distance: ");
+  Serial.println(distance);
+    delay(500);  
   
 //  double distance = double(reading) + 61.8322; //intermediate step
 //  distance = pow(distance,-1.5281); //another intermediate step
@@ -255,10 +267,10 @@ boolean positionCalibration()
   lengthL = getDistFromPoint(cCur, cMotorL);
   lengthR = getDistFromPoint(cCur, cMotorR);
   
-  if ((cCur.x > 5) || (cCur.x < 3.5))
+  if ((cCur.x > 13.5) || (cCur.x < 9.5))
   {
     coord cAdjust;
-    cAdjust.x = 4;
+    cAdjust.x = 10.8;
     cAdjust.y = IR_Y;
     moveToPoint(cAdjust);
     return positionCalibration();
