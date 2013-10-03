@@ -11,6 +11,8 @@
 
 typedef struct Coord { float x; float y; } coord;
 
+const int MAX_COLORS = 3;
+
 const float MOTOR_DIST = 245; // how far are the motors apart?
 const float DBL_MOTOR_DIST = 2*MOTOR_DIST;
 const float MOTOR_DIST2 = MOTOR_DIST*MOTOR_DIST;
@@ -45,16 +47,16 @@ const unsigned char OCR_VALUE = 156; //156 @ 15.625kHz = 100 Hz
 
 const float PAINT_X = 148;
 const float PAINT_Y = 413;
-coord cPaint;
+const coord cPaint = {PAINT_X, PAINT_Y};
 
 const int DIP_STEPS = 49; //number of steps down from cPaint to move to dip brush
 
 const float MOTOR_L_X = 0;
 const float MOTOR_L_Y = 0;
-coord cMotorL;
+const coord cMotorL = {MOTOR_L_X, MOTOR_L_Y};
 const float MOTOR_R_X = MOTOR_DIST;
 const float MOTOR_R_Y = 0;
-coord cMotorR;
+const coord cMotorR = {MOTOR_R_X, MOTOR_R_Y};
 
 const long SERIAL_TIMEOUT = 1000; //serial time out in ms (aka how long to wait before sending another 'R')
 

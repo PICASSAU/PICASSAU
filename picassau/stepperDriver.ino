@@ -29,12 +29,12 @@ void motorRStep(int steps)
   
   if (steps < 0)
   {
-    digitalWrite(PIN_MOTOR_R_DIR, LOW);
+    digitalWrite(PIN_MOTOR_R_DIR, HIGH);
     steps = -steps;
   }
   else
   {
-    digitalWrite(PIN_MOTOR_R_DIR, HIGH);
+    digitalWrite(PIN_MOTOR_R_DIR, LOW);
   }
   
   while( true )

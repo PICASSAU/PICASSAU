@@ -18,10 +18,6 @@ void plottingSetup()
 //  lengthL = INITIAL_LENGTH_L;
 //  lengthR = INITIAL_LENGTH_R;
 //  cCur = getCoord(lengthL, lengthR);
-  cMotorL.x = MOTOR_L_X;
-  cMotorL.y = MOTOR_L_Y;
-  cMotorR.x = MOTOR_R_X;
-  cMotorR.y = MOTOR_R_Y;
   
   pinMode( PIN_MOTOR_L_STEP, OUTPUT );
   pinMode( PIN_MOTOR_R_STEP, OUTPUT );

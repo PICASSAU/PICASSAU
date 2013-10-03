@@ -73,22 +73,30 @@ boolean parseInstruction()
   command = stringBuffer[0];
   if (command == 'D') //D for Done
     return true;
-  if ((command != 'L') && (command != 'M'))
+  if ((command != 'L') && (command != 'M') && (command != 'C'))
     return false;
   if (stringBuffer[1] != ' ')
     return false;
   
   char i = 2;
-  int temp = 0;
+  int temp = 0; //used to hold the number as it comes in
+  
   while (stringBuffer[i] != ',') //keep looping until you get to a comma
   {
-    if ((stringBuffer[i] < 0x30) || (stringBuffer[i] > 0x39))
+    if ((stringBuffer[i] < 0x30) || (stringBuffer[i] > 0x39)) //make sure it's '0' to '9'
       return false; //not a number
-    temp = temp*10 + stringBuffer[i] - 0x30;
+    temp = temp*10 + stringBuffer[i] - 0x30; //the -0x30 converts the character to an integer
     if ((++i) > 12) //allows a max of 10 digits
       return false; //too long
   }
-  cDest.x = temp + COORD_OFFSET_X;
+  
+  //set this number as the x coordinate if it's a move/line command
+  if (command != 'C')
+    cDest.x = temp + COORD_OFFSET_X;
+  else //otherwise, if it's a color command, make sure the color index is valid
+    if (temp >= MAX_COLORS)
+      return false;
+      
   i++;
   temp = 0;
   while (stringBuffer[i] != '\n') //keep looping until you get to a comma
@@ -99,7 +107,15 @@ boolean parseInstruction()
     if ((++i) > 23) //allows a max of 10 digits
       return false; //too long
   }
-  cDest.y = temp + COORD_OFFSET_Y;
+  
+  //set this number as the y coordinate if it's a move/line command
+  if (command != 'C')
+    cDest.y = temp + COORD_OFFSET_Y;
+  else //otherwise, if it's a color command, make sure it's 0
+    if (temp != 0)
+      return false;
+      
+  //all done    
   return true;
 }
         

@@ -18,8 +18,6 @@ void brushSetup()
   brushServo.write(BPOS_LIFT);
   brushSetting = BPOS_LIFT;
   rotateServo.write(0);
-  cPaint.x = PAINT_X;
-  cPaint.y = PAINT_Y;
   
   initTimer();
 }

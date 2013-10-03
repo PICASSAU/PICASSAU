@@ -35,13 +35,14 @@ void setup()
   serialSetup();  //set up the serial stuff
   plottingSetup(); //set up the stepper motors
   brushSetup(); //set up the brushes
-  debug();
+  //debug();
 }
 
 void loop()
 {
   serialReady(); //let the comp know that you're ready
-  do
+  
+  do //get instruction and verify it
   {
     while(!receiveInstruction()) //try to receive the instruction
     { //if failed to receive anything (timed out)
@@ -51,6 +52,8 @@ void loop()
       serialError(); //if there's an error, let the comp know
   } while (!verifyInstruction()); //try to verify the instruction with the comp
   
+  
+  //decide how to position the brush:
   if (command == 'M') //is it a move (no painting)?
   {
     brushWiggle = false;
@@ -69,8 +72,22 @@ void loop()
     if ((strokeDist > PAINTING_DISTANCE) && (strokeDist - tempDist > PAINTING_DISTANCE / 16))
       ;//dipBrush();
   }
+  
+  //and actually move
+  if ((command == 'M') || (command == 'L'))
+    moveToPoint(cDest); //and GO!
     
-  moveToPoint(cDest); //and GO!
+    
+  //miscellaneous other commands
+  if (command == 'D')
+  {
+    brushWiggle = false;
+    removeBrush();
+  }
+  if (command == 'C')
+  {
+    //do some color changing stuff
+  }
 }
 
 //I was using this to test stuff
