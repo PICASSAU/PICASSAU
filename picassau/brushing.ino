@@ -139,9 +139,6 @@ void dipBrush()
   
   brushWiggle = true;
   delay(1000);
-  brushWiggle = false;
-  
-  delay(1000);
   Serial.println("raising...");
   delay(1000);
   
@@ -152,9 +149,10 @@ void dipBrush()
     delay(MOTOR_DELAY);
   }
   
-  delay(1000);
+  brushWiggle = false;
+  delay(500);
   Serial.println("returning...");
-  delay(1000);
+  delay(500);
   
   removeBrush();
   

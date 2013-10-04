@@ -35,7 +35,7 @@ void setup()
   serialSetup();  //set up the serial stuff
   plottingSetup(); //set up the stepper motors
   brushSetup(); //set up the brushes
-  //debug();
+  debug();
 }
 
 void loop()
@@ -93,15 +93,7 @@ void loop()
 //I was using this to test stuff
 void debug()
 {
-  Serial.println("asdlfkjhsa;glknsa;lgkasf");
-  while(1)
-  {
-    motorLStep(200);
-    motorRStep(200);
-    motorLStep(-200);
-    motorRStep(-200);
-  }
-   
+  dipBrush();
 }
   
 

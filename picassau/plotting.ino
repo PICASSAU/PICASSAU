@@ -43,9 +43,10 @@ void moveToPoint( coord cD )
   Serial.println("moving");
   long t = millis(); //used to time motor delays / speed
   coord cStart = cCur; //start point
-  float curDist;
+  float curDist, prevDist = 0;
   signed char stateL; //will be 0, 1, or -1
   signed char stateR; //ditto
+  signed char stateB; //ditto
   
   float tempDL; //temporary holding variable for the distance from line for a left motor move
   float tempDR; //ditto but for right motor move
@@ -54,22 +55,40 @@ void moveToPoint( coord cD )
   coord cTempR; //ditto for right
   coord cTempB; //both
   
+  curDist = getDistFromPoint( cCur, cD );
+  prevDist = curDist+1;
+  
   while(1) //loop infinitely (until arriving at cD 
   {
     curDist = getDistFromPoint( cCur, cD ); //how far are we now from our destination?
     stateL = 0; // 0 is none, 1 is move +, -1 is move -
     stateR = 0; //ditto
     
+    if (((prevDist-curDist) < 0.01) && (curDist < 1.5))
+    {
+      Serial.println("d change thresh");
+      break;
+    }
+    
+    if (curDist < 0.6)
+    {
+      Serial.println("d thresh");
+      break;
+    }
+      
+    
+    
+    prevDist = curDist;
     
     cTempL = getCoord( lengthL+STEP_DIST, lengthR ); //what if we move left motor in + direction (let line out from spool)?
-    if (getDistFromPoint( cTempL, cD ) < curDist) //does it get us closer?
+    if (getDistFromPoint( cTempL, cD ) < curDist - STEP_THRESH) //does it get us closer?
     {
       tempDL = getDistFromLine( cStart, cD, cTempL ); //how close to the line are we?
       stateL = 1; //means that moving the left motor in + direction is better than -
     } else
     {
       cTempL = getCoord( lengthL-STEP_DIST, lengthR ); //try - direction
-      if (getDistFromPoint( cTempL, cD ) < curDist) //does it get us closer?
+      if (getDistFromPoint( cTempL, cD ) < curDist - STEP_THRESH) //does it get us closer?
       {
         tempDL = getDistFromLine( cStart, cD, cTempL ); //how close to the line are we?
         stateL = -1; //means - direction is better for left motor than + direction
@@ -78,17 +97,28 @@ void moveToPoint( coord cD )
     
     //this section does the same thing with the right motor that the above section does with the left motor
     cTempR = getCoord( lengthL, lengthR+STEP_DIST );
-    if (getDistFromPoint( cTempR, cD ) < curDist)
+    if (getDistFromPoint( cTempR, cD ) < curDist - STEP_THRESH)
     {
       tempDR = getDistFromLine( cStart, cD, cTempR );
       stateR = 1;
     } else
     {
       cTempR = getCoord( lengthL, lengthR-STEP_DIST );
-      if (getDistFromPoint( cTempR, cD ) < curDist)
+      if (getDistFromPoint( cTempR, cD ) < curDist - STEP_THRESH)
       {
         tempDR = getDistFromLine( cStart, cD, cTempR );
         stateR = -1;
+      }
+    }
+    
+    if ((stateL != 0) && (stateR != 0))
+    {
+      //this section does the same thing with the right motor that the above section does with the left motor
+      cTempB = getCoord( lengthL+STEP_DIST*stateL, lengthR+STEP_DIST*stateR );
+      if (getDistFromPoint( cTempB, cD ) < curDist - STEP_THRESH)
+      {
+        tempDB = getDistFromLine( cStart, cD, cTempB );
+        stateB = 1;
       }
     }
     
@@ -97,30 +127,46 @@ void moveToPoint( coord cD )
     if ((stateR != 0) && (stateL != 0)) //means that moving either motor will get us closer to the destination
     {
       
-      cTempB = getCoord( lengthL+stateL*STEP_DIST, lengthR+stateR*STEP_DIST);
-      tempDB = getDistFromLine( cStart, cD, cTempB );
-      
-      
-      if ((tempDL < tempDR) && (tempDL < tempDB)) //if left move gets closer than right move or both moves
+
+      if (stateB == 1)
       {
-        motorLStep( stateL ); //move +-1
-        lengthL += stateL*STEP_DIST; // change by +- STEP DIST
-        cCur = cTempL; //update the current coordinates
-        
-      } else if ((tempDR < tempDL) && (tempDR < tempDB)) //right move gets closer than left move or both moves
+        if ((tempDL < tempDR) && (tempDL < tempDB)) //if left move gets closer than right move or both moves
+        {
+          motorLStep( stateL ); //move +-1
+          lengthL += stateL*STEP_DIST; // change by +- STEP DIST
+          cCur = cTempL; //update the current coordinates
+          
+        } else if ((tempDR < tempDL) && (tempDR < tempDB)) //right move gets closer than left move or both moves
+        {
+          motorRStep( stateR ); //move +-1
+          lengthR += stateR*STEP_DIST; // change by +- STEP DIST
+          cCur = cTempR; //update the current coordinates
+          
+        } else  //otherwise both moves gets closest (or they're tied)
+        {
+          motorRStep( stateR ); //move both
+          motorLStep( stateL );
+          lengthL += stateL*STEP_DIST;
+          lengthR += stateR*STEP_DIST;
+          cCur = 
+          cCur = getCoord( lengthL, lengthR);
+        }
+      }
+      else
       {
-        motorRStep( stateR ); //move +-1
-        lengthR += stateR*STEP_DIST; // change by +- STEP DIST
-        cCur = cTempR; //update the current coordinates
-        
-      } else  //otherwise both moves gets closest (or they're tied)
-      {
-        motorRStep( stateR ); //move both
-        motorLStep( stateL );
-        lengthL += stateL*STEP_DIST;
-        lengthR += stateR*STEP_DIST;
-        cCur = 
-        cCur = getCoord( lengthL, lengthR);
+        if (tempDL < tempDR) //if left move gets closer than right move or both moves
+        {
+          motorLStep( stateL ); //move +-1
+          lengthL += stateL*STEP_DIST; // change by +- STEP DIST
+          cCur = cTempL; //update the current coordinates
+          
+        } else //right move gets closer than left move or both moves
+        {
+          motorRStep( stateR ); //move +-1
+          lengthR += stateR*STEP_DIST; // change by +- STEP DIST
+          cCur = cTempR; //update the current coordinates
+          
+        }
       }
         
     } else if (stateR != 0) //only right move gets closer
@@ -144,6 +190,8 @@ void moveToPoint( coord cD )
     t = millis();
     
   } //end while(1) loop
+  
+  Serial.println("done moving");
 }
 
 //////////////////////////////////////////////////////////
@@ -267,15 +315,114 @@ boolean positionCalibration()
   lengthL = getDistFromPoint(cCur, cMotorL);
   lengthR = getDistFromPoint(cCur, cMotorR);
   
-  if ((cCur.x > 13.5) || (cCur.x < 9.5))
+  if ((distance > 121) || (distance < 73))
   {
     coord cAdjust;
-    cAdjust.x = 10.8;
+    cAdjust.x = IR_X + 97 + (distance-97)/2;
     cAdjust.y = IR_Y;
     moveToPoint(cAdjust);
-    return positionCalibration();
+    return finePositionCalibration();
   }
   
   return true;
 } 
   
+  
+//////////////////////////////////////////////////////////
+////positionCalibration
+///Calibrates the position of the carriage by moving the platform
+/// up until it gets detected by the IR sensor.
+///Returns false if it fails.
+boolean finePositionCalibration()
+{
+  Serial.println("fine tuning...");
+  //step one: make sure that the carriage isn't already in front of the sensor
+  if (analogRead(PIN_IR_SENSOR) <= IR_THRESHOLD) //if voltage is greater than threshold voltage
+    //aka if distance is less than threshold distance
+  {
+    Serial.println("missed it");
+    delay(500);
+    for(int i = 0; i < DIP_STEPS; i++) //we're not dipping, but it's convenient to just go the same distance
+    {
+      motorLStep(1);
+      motorRStep(1);
+      delay(MOTOR_DELAY);
+    }
+    delay(1000);
+    
+      //ok, now we should be ready to start lifting the carriage
+    int count = 0;  //counts the steps moved upwards
+    int reading = 0; //will be used to store the sensor reading
+    Serial.println("scanning...");
+      delay(500);
+    while(1)
+    {
+      motorLStep(-1); //pull both motors up a step
+      motorRStep(-1);
+      delay(MOTOR_DELAY); //delay before reading sensor to give it time to finish moving
+      
+      
+      if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //have we found it?
+        break; //yes!
+        
+      if (++count >= MAX_CALIBRATION_STEPS) //have we moved too much (aka missed it?)
+      {  //if so, move back down to where you started, and report a failure
+        for(int i = 0; i < MAX_CALIBRATION_STEPS + CALIBRATION_Y_CORRECTION_STEPS; i++)
+        {
+          motorLStep(1);
+          motorRStep(1);
+          delay(MOTOR_DELAY);
+        }
+        return positionCalibration();
+      }
+    } //end while loop
+    
+    for(int i = 0; i < CALIBRATION_ADJUSTMENT_STEPS; i++)
+    {
+      motorLStep(-1);
+      motorRStep(-1);
+      delay(MOTOR_DELAY);
+    }
+  }
+  
+  Serial.println("found it");
+  delay(500);
+  //at this point we have found the carriage, now we just need to convert that voltage
+  //reading into an x distance
+  
+
+  
+  Serial.println("reading");
+    delay(500);
+  int reading = analogRead(PIN_IR_SENSOR);
+  //modeled using: 41.543 * (Voltage + 0.30221) ^ -1.5281,
+  //where voltage = reading * 5 / 1023
+  
+  double distance = pow(double(reading),-1.198);
+    distance = distance * 169721.1;//62930.3;
+  Serial.print("distance: ");
+  Serial.println(distance);
+    delay(500);  
+  
+//  double distance = double(reading) + 61.8322; //intermediate step
+//  distance = pow(distance,-1.5281); //another intermediate step
+//  distance = 499642.2*distance; //ok, now it's really the distance (in steps)
+    //where 100steps/11.125 inches
+
+  cCur.x = IR_X + distance; //assumes it's mounted on the left side
+  cCur.y = IR_Y;
+  
+  lengthL = getDistFromPoint(cCur, cMotorL);
+  lengthR = getDistFromPoint(cCur, cMotorR);
+  
+  if ((distance > 121) || (distance < 73))
+  {
+    coord cAdjust;
+    cAdjust.x = IR_X + 97 + (distance-97)/2;
+    cAdjust.y = IR_Y;
+    moveToPoint(cAdjust);
+    return finePositionCalibration();
+  }
+  
+  return true;
+} 
