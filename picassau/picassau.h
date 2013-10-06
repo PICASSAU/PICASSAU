@@ -13,7 +13,8 @@ typedef struct Coord { float x; float y; } coord;
 
 //// miscellaneous
 const int MAX_COLORS = 3; //how many paint colors?
-const int MOTOR_DELAY = 15;//30; // in ms, time between stepping the motors
+const int PAINT_MOTOR_DELAY = 80;//30; // in ms, time between stepping the motors
+const int MOVE_MOTOR_DELAY = 20;
 const long SERIAL_TIMEOUT = 1000; //serial time out in ms (aka how long to wait before sending another 'R')
 
 const float INITIAL_LENGTH_L = 314.6; //based on the starting position
@@ -32,7 +33,7 @@ const int STEP_THRESH = 0;
 
 // (0,0) is at the left spindle guide in absolute coordinates
 const int COORD_OFFSET_X = 115; //so at what coordinates is the top left
-const int COORD_OFFSET_Y = 200;//194; // corner of the canvas?
+const int COORD_OFFSET_Y = 250;//194; // corner of the canvas?
 
 //// calibration and sensor stuff
 const int IR_X = 85; //3.5 inches
@@ -43,10 +44,12 @@ const int CALIBRATION_ADJUSTMENT_STEPS = 35; //how much to move slightly up to c
 const int CALIBRATION_Y_CORRECTION_STEPS = 270; //if the carriage started above, how far down to go to correct it
 
 //// brush position and paint distance
-const float PAINTING_DISTANCE = 1000; //how far (in step-units) you can go before needing to redip brush
+const float PAINTING_DISTANCE = 500; //how far (in step-units) you can go before needing to redip brush
 const int BPOS_APPLY = 70; //angle of the brush servo when the brush is applied
 const int BPOS_DIP = 160; //angle of the brush servo when dipping in paint
 const int BPOS_LIFT = 135; //angle of the brush servo when lifted
+const int PAINT_WIGGLE_DIST = 10;
+const int DIP_WIGGLE_DIST = 5;
 
 //// constants for the timer interrupt (used for brush wiggling)
 const unsigned char PRESCALER = (1 << CS22) | (1 << CS21) | (1 << CS20); //aka prescaler of 1024 to get 15.625kHz
@@ -62,10 +65,10 @@ const unsigned char OCR_VALUE = 156; //156 @ 15.625kHz = 100 Hz
   //const coord cPaint1 = {PAINT_X1+COORD_OFFSET_X, PAINT_Y+COORD_OFFSET_Y};
   //const coord cPaint2 = {PAINT_X2+COORD_OFFSET_X, PAINT_Y+COORD_OFFSET_Y};
   //const coord cPaint3 = {PAINT_X3+COORD_OFFSET_X, PAINT_Y+COORD_OFFSET_Y};
-const float PAINT_X1 = 187.4; //4.5
-const float PAINT_X2 = 308.6; //9.5
-const float PAINT_X3 = 429.8; //14.5
-const float PAINT_Y = 1039; //40 - dipsteps //945+194
+const float PAINT_X1 = 172.4; //4.5
+const float PAINT_X2 = 293.6; //9.5
+const float PAINT_X3 = 414.8; //14.5
+const float PAINT_Y = 1030; //40 - dipsteps //945+194
 const coord cPaint1 = {PAINT_X1, PAINT_Y};
 const coord cPaint2 = {PAINT_X2, PAINT_Y};
 const coord cPaint3 = {PAINT_X3, PAINT_Y};

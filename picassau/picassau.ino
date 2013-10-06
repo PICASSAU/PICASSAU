@@ -15,6 +15,8 @@ char command = 0;
 coord cDest; //destination coordinates
 coord cCur; //current coordinates
 
+int motorDelay = MOVE_MOTOR_DELAY;
+
 float brushDist = 0;
 float totalDist = 0;
 float strokeDist = 0;
@@ -22,20 +24,22 @@ float strokeDist = 0;
 //Stepper stepperL(NSTEPS, PIN_STEP_L[0], PIN_STEP_L[1], PIN_STEP_L[2], PIN_STEP_L[3]);  
 //Stepper stepperR(NSTEPS, PIN_STEP_R[0], PIN_STEP_R[1], PIN_STEP_R[2], PIN_STEP_R[3]); 
 
+Servo armServo;
 Servo brushServo;
 Servo rotateServo;
 
 int brushSetting;
 int brushOffset = 0;
 boolean brushWiggle = false;
+int wiggleDist = 5;
 
 
 void setup()
 {
   serialSetup();  //set up the serial stuff
-  plottingSetup(); //set up the stepper motors
   brushSetup(); //set up the brushes
-  debug();
+  plottingSetup(); //set up the stepper motors
+  dipBrush();
 }
 
 void loop()
@@ -59,11 +63,14 @@ void loop()
     brushWiggle = false;
     removeBrush();
     totalDist += getDistFromPoint(cCur, cDest); //add this distance to total tally
+    motorDelay = MOVE_MOTOR_DELAY;
   }
   else if (command == 'L') //or is it a line (move with painting)?
   {
     applyBrush();
     brushWiggle = true;
+    wiggleDist = PAINT_WIGGLE_DIST;
+    motorDelay = PAINT_MOTOR_DELAY;
     float tempDist = getDistFromPoint(cCur, cDest);
     totalDist += tempDist; //add to total distance
     brushDist += tempDist; // and total painted distance
@@ -71,7 +78,9 @@ void loop()
     //if you will have painted too much, AND you've gone far enough
     if ((strokeDist > PAINTING_DISTANCE) && (strokeDist - tempDist > PAINTING_DISTANCE / 16))
     {
+      motorDelay = MOVE_MOTOR_DELAY;
       dipBrush();
+      motorDelay = PAINT_MOTOR_DELAY;
       strokeDist = 0;
     }
   }

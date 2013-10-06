@@ -24,9 +24,11 @@ void plottingSetup()
   pinMode( PIN_MOTOR_L_DIR, OUTPUT );
   pinMode( PIN_MOTOR_R_DIR, OUTPUT );
   
+  motorDelay = MOVE_MOTOR_DELAY;
+  
   motorLStep(1);
   motorRStep(1);
-  delay(MOTOR_DELAY);
+  delay(motorDelay);
   motorLStep(-1);
   motorRStep(-1);
   
@@ -184,7 +186,7 @@ void moveToPoint( coord cD )
       break; //leave the loop
     } 
     
-    while(millis()-t < MOTOR_DELAY) {} //wait for motor delay
+    while(millis()-t < motorDelay) {} //wait for motor delay
     t = millis();
     
   } //end while(1) loop
@@ -243,7 +245,7 @@ boolean positionCalibration()
     {
       motorLStep(1);
       motorRStep(1);
-      delay(MOTOR_DELAY);
+      delay(motorDelay);
     }
     delay(500);
     //now check again:
@@ -260,7 +262,7 @@ boolean positionCalibration()
   {
     motorLStep(-1); //pull both motors up a step
     motorRStep(-1);
-    delay(MOTOR_DELAY); //delay before reading sensor to give it time to finish moving
+    delay(motorDelay); //delay before reading sensor to give it time to finish moving
     
     
     if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //have we found it?
@@ -272,7 +274,7 @@ boolean positionCalibration()
       {
         motorLStep(1);
         motorRStep(1);
-        delay(MOTOR_DELAY);
+        delay(motorDelay);
       }
       return positionCalibration();
     }
@@ -287,7 +289,7 @@ boolean positionCalibration()
   {
     motorLStep(-1);
     motorRStep(-1);
-    delay(MOTOR_DELAY);
+    delay(motorDelay);
   }
   
 //  Serial.println("reading");
@@ -341,7 +343,7 @@ boolean finePositionCalibration()
     {
       motorLStep(1);
       motorRStep(1);
-      delay(MOTOR_DELAY);
+      delay(motorDelay);
     }
 //    delay(1000);
     
@@ -354,7 +356,7 @@ boolean finePositionCalibration()
     {
       motorLStep(-1); //pull both motors up a step
       motorRStep(-1);
-      delay(MOTOR_DELAY); //delay before reading sensor to give it time to finish moving
+      delay(motorDelay); //delay before reading sensor to give it time to finish moving
             
       if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //have we found it?
         break; //yes!
@@ -365,7 +367,7 @@ boolean finePositionCalibration()
         {
           motorLStep(1);
           motorRStep(1);
-          delay(MOTOR_DELAY);
+          delay(motorDelay);
         }
         return positionCalibration();
       }
@@ -375,7 +377,7 @@ boolean finePositionCalibration()
     {
       motorLStep(-1);
       motorRStep(-1);
-      delay(MOTOR_DELAY);
+      delay(motorDelay);
     }
   }
   

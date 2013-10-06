@@ -18,7 +18,7 @@ void motorLStep(int steps)
     if (--steps <= 0)
       break;
     digitalWrite(PIN_MOTOR_L_STEP, LOW);
-    delay(MOTOR_DELAY);
+    delay(motorDelay);
   }
   digitalWrite(PIN_MOTOR_L_STEP, LOW);
 }
@@ -43,7 +43,7 @@ void motorRStep(int steps)
     if (--steps <= 0)
       break;
     digitalWrite(PIN_MOTOR_R_STEP, LOW);
-    delay(MOTOR_DELAY);
+    delay(motorDelay);
   }
   digitalWrite(PIN_MOTOR_R_STEP, LOW);
 }

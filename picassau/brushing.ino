@@ -14,10 +14,12 @@
 void brushSetup()
 {
   brushServo.attach(PIN_BRUSH_SERVO);
-  rotateServo.attach(PIN_ROTATE_SERVO);
+  //rotateServo.attach(PIN_ROTATE_SERVO);
+  armServo.attach(PIN_ROTATE_SERVO);
   brushServo.write(BPOS_LIFT);
   brushSetting = BPOS_LIFT;
-  rotateServo.write(0);
+  //rotateServo.write(0);
+  armServo.write(45);
   
   initTimer();
 }
@@ -52,12 +54,12 @@ ISR(TIMER2_COMPA_vect)
     if (dir)
     {
       brushOffset++;
-      if (brushOffset >= 5)
+      if (brushOffset >= wiggleDist)
         dir = !dir;
     } else
     {
       brushOffset--;
-      if (brushOffset <= -5)
+      if (brushOffset <= -wiggleDist)
         dir = !dir;
     }
     brushServo.write(brushSetting+brushOffset);
@@ -77,12 +79,24 @@ void applyBrush()
     if ( interruptFlag )
       brushWiggle = false;
     
-    //slowly apply the brush to keep the carriage from bouncing
-    //off the poster
     for (int i = 45; i >= 0; i--)
     {
+      armServo.write(i);
+      delay(10);
+    }
+    
+    //slowly apply the brush to keep the carriage from bouncing
+    //off the poster
+    for (int i = 40; i >= 0; i--)
+    {
       brushServo.write(BPOS_APPLY+i);
-      delay(50);
+      delay(20);
+    }
+    
+    for (int i = 0; i <= 45; i++)
+    {
+      armServo.write(i);
+      delay(10);
     }
     
     brushSetting = BPOS_APPLY;
@@ -100,11 +114,32 @@ void applyBrush()
 ///removes the brush
 void removeBrush()
 {
+  boolean armFlag = (brushSetting == BPOS_APPLY);
+  
+  if (armFlag)
+  {
+    for (int i = 45; i >= 0; i--)
+    {
+      armServo.write(i);
+      delay(10);
+    }
+  }
+  
   brushServo.write(BPOS_LIFT);
   brushSetting = BPOS_LIFT;
   brushOffset = 0;
   
   delay(100);
+  
+  if (armFlag)
+  {
+    for (int i = 0; i <= 45; i++)
+    {
+      armServo.write(i);
+      delay(10);
+    }
+  }
+  
 }
 
 //////////////////////////////////////////////////////////
@@ -113,6 +148,7 @@ void removeBrush()
 void dipBrush()
 {
   int brushPrevSetting = brushSetting;
+  int prevWiggleDist = wiggleDist;
   boolean brushPrevWiggle = brushWiggle;
   
   brushWiggle = false;
@@ -136,13 +172,14 @@ void dipBrush()
   {
     motorLStep(1);
     motorRStep(1);
-    delay(MOTOR_DELAY);
+    delay(motorDelay);
   }
   
 //  delay(1000);
   //Serial.println("wiggling...");
   
   brushWiggle = true;
+  wiggleDist = DIP_WIGGLE_DIST;
   delay(1000);
 //  Serial.println("raising...");
   delay(1000);
@@ -151,7 +188,7 @@ void dipBrush()
   {
     motorLStep(-1);
     motorRStep(-1);
-    delay(MOTOR_DELAY);
+    delay(motorDelay);
   }
   
   brushWiggle = false;
@@ -166,6 +203,7 @@ void dipBrush()
   if (brushPrevSetting == BPOS_APPLY)
     applyBrush();
   brushWiggle = brushPrevWiggle;
+  wiggleDist = prevWiggleDist;
 //  brushServo.write(brushPrevSetting);
 //  brushSetting = brushPrevSetting;
 }

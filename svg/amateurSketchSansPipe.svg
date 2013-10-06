@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="1980"
+   height="2520"
+   id="svg2">
+  <defs
+     id="defs4" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(0,1467.6403)"
+     id="layer1">
+    <path
+       d="m 285.71429,931.42857 0,-114.28571 194.28571,0 L 480,320 l 942.8571,0 -5.7142,508.57143 167.5422,1.99204 1.0291,189.43653 -1294.28567,0"
+       transform="translate(0,-1467.6403)"
+       id="path2987"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       d="M 431.42857,1017.1429 C 74.285714,1185.7143 242.85714,2188.5714 905.71428,2191.4285 1568.5714,2194.2857 1745.7143,1191.4286 1351.4286,1017.1429"
+       transform="translate(0,-1467.6403)"
+       id="path2989"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       d="m 557.14285,318.07403 c 0,145.7142 222.85715,174.2857 357.14286,174.2857 134.28569,0 325.71429,-20 328.57139,-160"
+       id="path2991"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       d="m 851.42857,1542.8571 51.42857,100 L 960,1545.7143"
+       transform="translate(0,-1467.6403)"
+       id="path2993"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       d="m 514.28571,1262.8571 245.71429,0"
+       transform="translate(0,-1467.6403)"
+       id="path2995"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       d="m 1037.1429,1262.8571 237.1428,0"
+       transform="translate(0,-1467.6403)"
+       id="path2997"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+  </g>
+</svg>
