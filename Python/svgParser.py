@@ -179,7 +179,7 @@ def main():
 
     mySVG = svgParser()
     #load in file - here I'm doing it manually
-    file = "C:\Users\Kayla\Documents\School\Fall 2013\Senior Design\svgParser\demoCircle2.svg"
+    file = "C:\Users\Kayla\Documents\GitHub\PICASSAU\svg\sketch1.svg"
 
     #N sets how many sections curves are divided into
     N = 10
@@ -249,8 +249,10 @@ def main():
                     #take care of it when we get to the actual numbers (see below)
                     if mySVG.matchAny("c", element):
                         lastComm = 'c'
+                        lastCaseUp = False
                     else:
                         lastComm = 'C'
+                        lastCaseUp = True
                     Ccount = 0
                     lastElemLet = True
 
@@ -275,7 +277,8 @@ def main():
             #if the element isn't a letter...(it's a number)
             else:
                 #this section will go through calculating a curve
-                if lastComm is ('c' or 'C'):
+                #if lastComm is ('c' or 'C'): #this doesn't work as expected
+                if ((lastComm is 'c') or (lastComm is 'C')):
                     if Ccount  is 0: #this is a counter to gather the curve coords
                         #the first point used to calucalte the curve is the previous
                         #point, so add the x and y to the corresponding P arrays
@@ -286,7 +289,7 @@ def main():
                     #add the current coordinates to the PX and PY arrays
                     tempx = mySVG.splitStrXY(element)[0]
                     tempy = mySVG.splitStrXY(element)[1]
-                    if lastComm is 'c':
+                    if lastCaseUp == False:
                         #if c is lowercase, it's relative to the 1st point
                         tempx += PXArray[0]
                         tempy += PYArray[0]
