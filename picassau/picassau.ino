@@ -70,7 +70,10 @@ void loop()
     strokeDist += tempDist; // and to the current stroke distance
     //if you will have painted too much, AND you've gone far enough
     if ((strokeDist > PAINTING_DISTANCE) && (strokeDist - tempDist > PAINTING_DISTANCE / 16))
-      ;//dipBrush();
+    {
+      dipBrush();
+      strokeDist = 0;
+    }
   }
   
   //and actually move
@@ -79,12 +82,12 @@ void loop()
     
     
   //miscellaneous other commands
-  if (command == 'D')
+  if (command == 'D') //d for done
   {
     brushWiggle = false;
     removeBrush();
   }
-  if (command == 'C')
+  if (command == 'C') //c for color change
   {
     //do some color changing stuff
   }

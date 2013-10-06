@@ -79,14 +79,16 @@ void applyBrush()
     
     //slowly apply the brush to keep the carriage from bouncing
     //off the poster
-    for (int i = 40; i >= 0; i--)
+    for (int i = 45; i >= 0; i--)
     {
       brushServo.write(BPOS_APPLY+i);
-      delay(10);
+      delay(50);
     }
     
     brushSetting = BPOS_APPLY;
     brushOffset = 0;
+    
+    delay(500);
     
     if (interruptFlag)
       brushWiggle = true; //re-enable wiggle
@@ -110,6 +112,9 @@ void removeBrush()
 ///dips the brush into the paint
 void dipBrush()
 {
+  int brushPrevSetting = brushSetting;
+  boolean brushPrevWiggle = brushWiggle;
+  
   brushWiggle = false;
   brushServo.write(BPOS_DIP);
   brushSetting = BPOS_DIP;
@@ -117,15 +122,15 @@ void dipBrush()
   
   coord cReturn = cCur;
   
-  delay(1000);
-  //Serial.println("moving to paint coordinates...");
-  delay(1000);
+//  delay(1000);
+//  Serial.println("moving to paint coordinates...");
+//  delay(1000);
   
   moveToPoint(cPaint2);
   
-  delay(1000);
+//  delay(1000);
   //Serial.println("dipping...");
-  delay(1000);
+//  delay(1000);
   
   for(int i = 0; i < DIP_STEPS; i++)
   {
@@ -134,12 +139,12 @@ void dipBrush()
     delay(MOTOR_DELAY);
   }
   
-  delay(1000);
+//  delay(1000);
   //Serial.println("wiggling...");
   
   brushWiggle = true;
   delay(1000);
-  Serial.println("raising...");
+//  Serial.println("raising...");
   delay(1000);
   
   for(int i = 0; i < DIP_STEPS; i++)
@@ -150,13 +155,19 @@ void dipBrush()
   }
   
   brushWiggle = false;
-  delay(500);
-  Serial.println("returning...");
+//  delay(500);
+//  Serial.println("returning...");
   delay(500);
   
   removeBrush();
   
   moveToPoint(cReturn);
+  
+  if (brushPrevSetting == BPOS_APPLY)
+    applyBrush();
+  brushWiggle = brushPrevWiggle;
+//  brushServo.write(brushPrevSetting);
+//  brushSetting = brushPrevSetting;
 }
 
 void rotateBrush(int deg)

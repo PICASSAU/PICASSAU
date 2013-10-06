@@ -40,7 +40,7 @@ void plottingSetup()
 ///moves from the current coordinates to destination cD.
 void moveToPoint( coord cD )
 {
-  Serial.println("moving");
+//  Serial.println("moving");
   long t = millis(); //used to time motor delays / speed
   coord cStart = cCur; //start point
   float curDist, prevDist = 0;
@@ -63,16 +63,17 @@ void moveToPoint( coord cD )
     curDist = getDistFromPoint( cCur, cD ); //how far are we now from our destination?
     stateL = 0; // 0 is none, 1 is move +, -1 is move -
     stateR = 0; //ditto
+    stateB = 0;
     
     if (((prevDist-curDist) < 0.01) && (curDist < 1.5))
     {
-      Serial.println("d change thresh");
+//      Serial.println("d change thresh");
       break;
     }
     
     if (curDist < 0.6)
     {
-      Serial.println("d thresh");
+//      Serial.println("d thresh");
       break;
     }
       
@@ -124,19 +125,17 @@ void moveToPoint( coord cD )
     
     
     //ok, now let's see which move is better
-    if ((stateR != 0) && (stateL != 0)) //means that moving either motor will get us closer to the destination
-    {
-      
-
+    if ((stateL != 0) && (stateR != 0)) //means that moving either motor will get us closer to the destination
+    { 
       if (stateB == 1)
       {
-        if ((tempDL < tempDR) && (tempDL < tempDB)) //if left move gets closer than right move or both moves
+        if ((tempDL <= tempDR) && (tempDL <= tempDB)) //if left move gets closer than right move or both moves
         {
           motorLStep( stateL ); //move +-1
           lengthL += stateL*STEP_DIST; // change by +- STEP DIST
           cCur = cTempL; //update the current coordinates
           
-        } else if ((tempDR < tempDL) && (tempDR < tempDB)) //right move gets closer than left move or both moves
+        } else if ((tempDR <= tempDL) && (tempDR <= tempDB)) //right move gets closer than left move or both moves
         {
           motorRStep( stateR ); //move +-1
           lengthR += stateR*STEP_DIST; // change by +- STEP DIST
@@ -148,13 +147,12 @@ void moveToPoint( coord cD )
           motorLStep( stateL );
           lengthL += stateL*STEP_DIST;
           lengthR += stateR*STEP_DIST;
-          cCur = 
           cCur = getCoord( lengthL, lengthR);
         }
       }
       else
       {
-        if (tempDL < tempDR) //if left move gets closer than right move or both moves
+        if (tempDL <= tempDR) //if left move gets closer than right move or both moves
         {
           motorLStep( stateL ); //move +-1
           lengthL += stateL*STEP_DIST; // change by +- STEP DIST
@@ -191,7 +189,7 @@ void moveToPoint( coord cD )
     
   } //end while(1) loop
   
-  Serial.println("done moving");
+  //Serial.println("done moving");
 }
 
 //////////////////////////////////////////////////////////
@@ -239,7 +237,7 @@ boolean positionCalibration()
   if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //if voltage is greater than threshold voltage
     //aka if distance is less than threshold distance
   {
-    Serial.println("saw it early");
+//    Serial.println("saw it early");
     delay(500);
     for(int i = 0; i < DIP_STEPS; i++) //we're not dipping, but it's convenient to just go the same distance
     {
@@ -247,7 +245,7 @@ boolean positionCalibration()
       motorRStep(1);
       delay(MOTOR_DELAY);
     }
-    delay(1000);
+    delay(500);
     //now check again:
 //    if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD)
 //      return false; //calibration fails if sensor is still picking something up.
@@ -256,8 +254,8 @@ boolean positionCalibration()
   //ok, now we should be ready to start lifting the carriage
   int count = 0;  //counts the steps moved upwards
   int reading = 0; //will be used to store the sensor reading
-  Serial.println("scanning...");
-    delay(500);
+//  Serial.println("scanning...");
+//  delay(500);
   while(1)
   {
     motorLStep(-1); //pull both motors up a step
@@ -280,8 +278,8 @@ boolean positionCalibration()
     }
   } //end while loop
   
-  Serial.println("found it");
-    delay(500);
+//  Serial.println("found it");
+//    delay(500);
   //at this point we have found the carriage, now we just need to convert that voltage
   //reading into an x distance
   
@@ -292,31 +290,27 @@ boolean positionCalibration()
     delay(MOTOR_DELAY);
   }
   
-  Serial.println("reading");
-    delay(500);
+//  Serial.println("reading");
+  delay(500); //let it settle slightly before reading
   reading = analogRead(PIN_IR_SENSOR);
-  //modeled using: 41.543 * (Voltage + 0.30221) ^ -1.5281,
-  //where voltage = reading * 5 / 1023
-  
-  double distance = pow(double(reading),-1.198);
-    distance = distance * 169721.1;//62930.3;
-  Serial.print("distance: ");
-  Serial.println(distance);
-    delay(500);  
-  
-//  double distance = double(reading) + 61.8322; //intermediate step
-//  distance = pow(distance,-1.5281); //another intermediate step
-//  distance = 499642.2*distance; //ok, now it's really the distance (in steps)
-    //where 100steps/11.125 inches
 
+  //this equation was made using line-fitting in excel with actual measurements
+  double distance = pow(double(reading),-1.198);
+  distance = distance * 169721.1;//62930.3;
+//  Serial.print("distance: ");
+//  Serial.println(distance);
+//  delay(500);  
+  
+  //set the current coordinates based on where it is relative to the IR sensor
   cCur.x = IR_X + distance; //assumes it's mounted on the left side
   cCur.y = IR_Y;
   
+  //calculate the lengths of the fishing line
   lengthL = getDistFromPoint(cCur, cMotorL);
   lengthR = getDistFromPoint(cCur, cMotorR);
   
-  if ((distance > 121) || (distance < 73))
-  {
+  if ((distance > 121) || (distance < 73)) //are you in the ideal sensor range yet?
+  {                  //if not, then move halfway from where you are to the center of the ideal range
     coord cAdjust;
     cAdjust.x = IR_X + 97 + (distance-97)/2;
     cAdjust.y = IR_Y;
@@ -335,33 +329,33 @@ boolean positionCalibration()
 ///Returns false if it fails.
 boolean finePositionCalibration()
 {
-  Serial.println("fine tuning...");
-  //step one: make sure that the carriage isn't already in front of the sensor
-  if (analogRead(PIN_IR_SENSOR) <= IR_THRESHOLD) //if voltage is greater than threshold voltage
-    //aka if distance is less than threshold distance
+//  Serial.println("fine tuning...");
+
+  //step one: make sure that the carriage IS already in front of the sensor
+  if (analogRead(PIN_IR_SENSOR) <= IR_THRESHOLD) //if voltage is less than or equal to threshold voltage
+    //aka if distance is greater than threshold distance
   {
-    Serial.println("missed it");
-    delay(500);
+//    Serial.println("missed it");
+//    delay(500);
     for(int i = 0; i < DIP_STEPS; i++) //we're not dipping, but it's convenient to just go the same distance
     {
       motorLStep(1);
       motorRStep(1);
       delay(MOTOR_DELAY);
     }
-    delay(1000);
+//    delay(1000);
     
       //ok, now we should be ready to start lifting the carriage
     int count = 0;  //counts the steps moved upwards
     int reading = 0; //will be used to store the sensor reading
-    Serial.println("scanning...");
-      delay(500);
+//    Serial.println("scanning...");
+//    delay(500);
     while(1)
     {
       motorLStep(-1); //pull both motors up a step
       motorRStep(-1);
       delay(MOTOR_DELAY); //delay before reading sensor to give it time to finish moving
-      
-      
+            
       if (analogRead(PIN_IR_SENSOR) > IR_THRESHOLD) //have we found it?
         break; //yes!
         
@@ -385,38 +379,27 @@ boolean finePositionCalibration()
     }
   }
   
-  Serial.println("found it");
-  delay(500);
-  //at this point we have found the carriage, now we just need to convert that voltage
-  //reading into an x distance
-  
-
-  
-  Serial.println("reading");
-    delay(500);
+//  Serial.println("found it");
+  delay(500); //let it settle slightly before reading
   int reading = analogRead(PIN_IR_SENSOR);
-  //modeled using: 41.543 * (Voltage + 0.30221) ^ -1.5281,
-  //where voltage = reading * 5 / 1023
-  
-  double distance = pow(double(reading),-1.198);
-    distance = distance * 169721.1;//62930.3;
-  Serial.print("distance: ");
-  Serial.println(distance);
-    delay(500);  
-  
-//  double distance = double(reading) + 61.8322; //intermediate step
-//  distance = pow(distance,-1.5281); //another intermediate step
-//  distance = 499642.2*distance; //ok, now it's really the distance (in steps)
-    //where 100steps/11.125 inches
 
+  //this equation was made using line-fitting in excel with actual measurements
+  double distance = pow(double(reading),-1.198);
+  distance = distance * 169721.1;//62930.3;
+//  Serial.print("distance: ");
+//  Serial.println(distance);
+//  delay(500);  
+  
+  //set the current coordinates based on where it is relative to the IR sensor
   cCur.x = IR_X + distance; //assumes it's mounted on the left side
   cCur.y = IR_Y;
   
+  //calculate the lengths of the fishing line
   lengthL = getDistFromPoint(cCur, cMotorL);
   lengthR = getDistFromPoint(cCur, cMotorR);
   
-  if ((distance > 121) || (distance < 73))
-  {
+  if ((distance > 121) || (distance < 73)) //are you in the ideal sensor range yet?
+  {                  //if not, then move halfway from where you are to the center of the ideal range
     coord cAdjust;
     cAdjust.x = IR_X + 97 + (distance-97)/2;
     cAdjust.y = IR_Y;
