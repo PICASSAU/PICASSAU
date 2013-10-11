@@ -44,7 +44,7 @@ class svgParser:
         self.fileWidth = 1 #default file width - found in svg file
         self.fileHeight = 1 #default file height - found in svg file
 
-        self.ser = serial.Serial('COM5') #9600 Baud, 8 data bits, No parity, 1 stop bit
+        #self.ser = serial.Serial('COM5') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
 
     def readInFile(self, file):
@@ -174,6 +174,13 @@ class svgParser:
         self.ser.flush()
         ardCheck = self.ser.readline()
         return ardCheck
+
+    def writeToFile(self, file, list):
+        strList = [str(i) for i in list]
+        file.write(','.join(strList))
+        file.write("]\n")
+
+
 
 def main():
 
@@ -349,22 +356,33 @@ def main():
 
                 lastElemLet = False
 
-    print mySVG.commands0
-    print mySVG.xCoords0
-    print mySVG.yCoords0
-    print "\n"
+    #output the command/coordinate info to a file called "pythonOutput"
+    file = open('pythonOutput.txt', 'w')
 
-    print mySVG.commands1
-    print mySVG.xCoords1
-    print mySVG.yCoords1
-    print "\n"
+    file.write("commands0 = [")
+    mySVG.writeToFile(file, mySVG.commands0)
+    file.write("xcoords0 = [")
+    mySVG.writeToFile(file, mySVG.xCoords0)
+    file.write("ycoords0 = [")
+    mySVG.writeToFile(file, mySVG.yCoords0)
 
-    print mySVG.commands2
-    print mySVG.xCoords2
-    print mySVG.yCoords2
-    print "\n"
+    file.write("commands1 = [")
+    mySVG.writeToFile(file, mySVG.commands1)
+    file.write("xCoords1 = [")
+    mySVG.writeToFile(file, mySVG.xCoords1)
+    file.write("yCoords1 = [")
+    mySVG.writeToFile(file, mySVG.yCoords1)
 
+    file.write("commands2 =[")
+    mySVG.writeToFile(file, mySVG.commands2)
+    file.write("xCoords2 = [")
+    mySVG.writeToFile(file, mySVG.xCoords2)
+    file.write("yCoords2 =[")
+    mySVG.writeToFile(file, mySVG.yCoords2)
 
+    file.close()
+
+'''
     #start talking to Arduino
     print "Start talking to Arduino"
 
@@ -466,7 +484,7 @@ def main():
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
 
-
+'''
 
 if __name__ == '__main__':
     main()
