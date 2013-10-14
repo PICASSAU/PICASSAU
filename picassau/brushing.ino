@@ -14,11 +14,11 @@
 void brushSetup()
 {
   brushServo.attach(PIN_BRUSH_SERVO);
-  //rotateServo.attach(PIN_ROTATE_SERVO);
-  armServo.attach(PIN_ROTATE_SERVO);
+  rotateServo.attach(PIN_ROTATE_SERVO);
+  armServo.attach(PIN_ARM_SERVO);
   brushServo.write(BPOS_LIFT);
   brushSetting = BPOS_LIFT;
-  //rotateServo.write(0);
+  rotateServo.write(ROTATE_SERVO_HOME);
   armServo.write(45);
   
   initTimer();
@@ -151,6 +151,11 @@ void dipBrush()
   int prevWiggleDist = wiggleDist;
   boolean brushPrevWiggle = brushWiggle;
   
+  rotateBrush(ROTATE_SERVO_HOME);
+  motorDelay = MOVE_MOTOR_DELAY;
+  
+  removeBrush(); //go to removed position first (includes pushing away from canvas if needed)
+  
   brushWiggle = false;
   brushServo.write(BPOS_DIP);
   brushSetting = BPOS_DIP;
@@ -172,7 +177,7 @@ void dipBrush()
   {
     motorLStep(1);
     motorRStep(1);
-    delay(motorDelay);
+    delay(DIP_MOTOR_DELAY);
   }
   
 //  delay(1000);
@@ -188,7 +193,7 @@ void dipBrush()
   {
     motorLStep(-1);
     motorRStep(-1);
-    delay(motorDelay);
+    delay(DIP_MOTOR_DELAY);
   }
   
   brushWiggle = false;
@@ -201,7 +206,10 @@ void dipBrush()
   moveToPoint(cReturn);
   
   if (brushPrevSetting == BPOS_APPLY)
+  {
     applyBrush();
+    motorDelay = PAINT_MOTOR_DELAY;
+  }
   brushWiggle = brushPrevWiggle;
   wiggleDist = prevWiggleDist;
 //  brushServo.write(brushPrevSetting);
@@ -210,6 +218,7 @@ void dipBrush()
 
 void rotateBrush(int deg)
 {
+  brushRotation = deg;
   rotateServo.write(deg);
 }
 

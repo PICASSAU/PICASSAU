@@ -14,8 +14,11 @@ typedef struct Coord { float x; float y; } coord;
 //// miscellaneous
 const int MAX_COLORS = 3; //how many paint colors?
 const int PAINT_MOTOR_DELAY = 80;//30; // in ms, time between stepping the motors
-const int MOVE_MOTOR_DELAY = 20;
+const int MOVE_MOTOR_DELAY = 20; //moving, including going to the dipping checkpoint
+const int DIP_MOTOR_DELAY = 30; //just for the straight-down move while dipping
+const int CALIB_MOTOR_DELAY = 40; //used during calibration
 const long SERIAL_TIMEOUT = 1000; //serial time out in ms (aka how long to wait before sending another 'R')
+//const float RAD_TO_DEG = (180/3.14159265358979); //apparently this is already a thing
 
 const float INITIAL_LENGTH_L = 314.6; //based on the starting position
 const float INITIAL_LENGTH_R = 322.5; // of the platform
@@ -50,6 +53,7 @@ const int BPOS_DIP = 160; //angle of the brush servo when dipping in paint
 const int BPOS_LIFT = 135; //angle of the brush servo when lifted
 const int PAINT_WIGGLE_DIST = 10;
 const int DIP_WIGGLE_DIST = 5;
+const int ROTATE_SERVO_HOME = 0;
 
 //// constants for the timer interrupt (used for brush wiggling)
 const unsigned char PRESCALER = (1 << CS22) | (1 << CS21) | (1 << CS20); //aka prescaler of 1024 to get 15.625kHz
@@ -84,7 +88,8 @@ const coord cMotorR = {MOTOR_R_X, MOTOR_R_Y};
 
 //// pin numbers
 const int PIN_BRUSH_SERVO = 2;
-const int PIN_ROTATE_SERVO = 3;
+const int PIN_ARM_SERVO = 3;
+const int PIN_ROTATE_SERVO = 4;
 //const int PIN_STEP_L[4] = {6,7,8,9};
 //const int PIN_STEP_R[4] = {10,11,12,13};
 const int PIN_MOTOR_L_STEP = 11;

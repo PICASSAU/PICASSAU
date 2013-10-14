@@ -24,7 +24,7 @@ void plottingSetup()
   pinMode( PIN_MOTOR_L_DIR, OUTPUT );
   pinMode( PIN_MOTOR_R_DIR, OUTPUT );
   
-  motorDelay = MOVE_MOTOR_DELAY;
+  motorDelay = CALIB_MOTOR_DELAY;
   
   motorLStep(1);
   motorRStep(1);
@@ -410,4 +410,16 @@ boolean finePositionCalibration()
   }
   
   return true;
-} 
+}
+
+//////////////////////////////////////////////////////////
+////getServoAngle
+///Shoulddddd return the servo angle for the rotation servo
+/// corresponding to the direction from start to dest (or dest to start).
+/// Should hopefully come out between 0 to 180 deg.
+///Returns the angle in deg [0,180]
+float getServoAngle( coord start, coord dest )
+{
+  float deg = atan((dest.y-start.y)/(dest.x-start.x))*RAD_TO_DEG;
+  deg = 90 - deg;
+}

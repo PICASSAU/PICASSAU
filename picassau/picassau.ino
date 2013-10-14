@@ -28,10 +28,11 @@ Servo armServo;
 Servo brushServo;
 Servo rotateServo;
 
-int brushSetting;
-int brushOffset = 0;
-boolean brushWiggle = false;
-int wiggleDist = 5;
+int brushSetting; //the angle in deg that the brush is applied (like dipped, applied, removed)
+int brushRotation = 0; //what angle in deg that the brush is rotated
+int brushOffset = 0; //used in wiggling
+boolean brushWiggle = false; //set true to wiggle
+int wiggleDist = 5; //what range to wiggle brush; brush wiggles in arc of +/- [wiggleDist] degrees
 
 
 void setup()
@@ -67,10 +68,6 @@ void loop()
   }
   else if (command == 'L') //or is it a line (move with painting)?
   {
-    applyBrush();
-    brushWiggle = true;
-    wiggleDist = PAINT_WIGGLE_DIST;
-    motorDelay = PAINT_MOTOR_DELAY;
     float tempDist = getDistFromPoint(cCur, cDest);
     totalDist += tempDist; //add to total distance
     brushDist += tempDist; // and total painted distance
@@ -83,6 +80,13 @@ void loop()
       motorDelay = PAINT_MOTOR_DELAY;
       strokeDist = 0;
     }
+    //now apply the brush to get ready for painting
+    applyBrush();
+    rotateBrush(getServoAngle(cCur, cDest));
+    
+    brushWiggle = true;
+    wiggleDist = PAINT_WIGGLE_DIST;
+    motorDelay = PAINT_MOTOR_DELAY;
   }
   
   //and actually move
