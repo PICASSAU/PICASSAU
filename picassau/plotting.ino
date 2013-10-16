@@ -418,8 +418,9 @@ boolean finePositionCalibration()
 /// corresponding to the direction from start to dest (or dest to start).
 /// Should hopefully come out between 0 to 180 deg.
 ///Returns the angle in deg [0,180]
-float getServoAngle( coord start, coord dest )
+int getServoAngle( coord start, coord dest )
 {
   float deg = atan((dest.y-start.y)/(dest.x-start.x))*RAD_TO_DEG;
   deg = 90 - deg;
+  return int(deg);
 }

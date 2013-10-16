@@ -94,8 +94,11 @@ boolean parseInstruction()
   if (command != 'C')
     cDest.x = temp + COORD_OFFSET_X;
   else //otherwise, if it's a color command, make sure the color index is valid
+  {
     if (temp >= MAX_COLORS)
       return false;
+    newColor = temp;
+  }
       
   i++;
   temp = 0;

@@ -19,8 +19,8 @@ void brushSetup()
   brushServo.write(BPOS_LIFT);
   brushSetting = BPOS_LIFT;
   rotateServo.write(ROTATE_SERVO_HOME);
-  armServo.write(45);
-  
+  armServo.write(75);
+
   initTimer();
 }
 
@@ -79,7 +79,7 @@ void applyBrush()
     if ( interruptFlag )
       brushWiggle = false;
     
-    for (int i = 45; i >= 0; i--)
+    for (int i = ARM_SERVO_UP; i >= ARM_SERVO_DOWN; i--)
     {
       armServo.write(i);
       delay(10);
@@ -93,7 +93,7 @@ void applyBrush()
       delay(20);
     }
     
-    for (int i = 0; i <= 45; i++)
+    for (int i = ARM_SERVO_DOWN; i <= ARM_SERVO_UP; i++)
     {
       armServo.write(i);
       delay(10);
@@ -118,7 +118,7 @@ void removeBrush()
   
   if (armFlag)
   {
-    for (int i = 45; i >= 0; i--)
+    for (int i = ARM_SERVO_UP; i >= ARM_SERVO_DOWN; i--)
     {
       armServo.write(i);
       delay(10);
@@ -133,7 +133,7 @@ void removeBrush()
   
   if (armFlag)
   {
-    for (int i = 0; i <= 45; i++)
+    for (int i = ARM_SERVO_DOWN; i <= ARM_SERVO_UP; i++)
     {
       armServo.write(i);
       delay(10);
@@ -166,8 +166,12 @@ void dipBrush()
 //  delay(1000);
 //  Serial.println("moving to paint coordinates...");
 //  delay(1000);
-  
-  moveToPoint(cPaint2);
+  if (currentColor == 0)
+    moveToPoint(cPaint1);
+  else if (currentColor == 1)
+    moveToPoint(cPaint2);
+  else if (currentColor == 2)
+    moveToPoint(cPaint3);
   
 //  delay(1000);
   //Serial.println("dipping...");
@@ -220,6 +224,8 @@ void rotateBrush(int deg)
 {
   brushRotation = deg;
   rotateServo.write(deg);
+  //Serial.print("deg: ");
+  //Serial.println(deg);
 }
 
 

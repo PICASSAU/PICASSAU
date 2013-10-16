@@ -34,6 +34,8 @@ int brushOffset = 0; //used in wiggling
 boolean brushWiggle = false; //set true to wiggle
 int wiggleDist = 5; //what range to wiggle brush; brush wiggles in arc of +/- [wiggleDist] degrees
 
+int currentColor = 0;
+int newColor = 0;
 
 void setup()
 {
@@ -102,7 +104,11 @@ void loop()
   }
   if (command == 'C') //c for color change
   {
-    //do some color changing stuff
+    if (newColor != currentColor)
+    {
+      //do some color changing stuff
+    }
+    //otherwise it doesn't matter
   }
 }
 

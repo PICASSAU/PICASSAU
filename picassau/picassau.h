@@ -53,7 +53,9 @@ const int BPOS_DIP = 160; //angle of the brush servo when dipping in paint
 const int BPOS_LIFT = 135; //angle of the brush servo when lifted
 const int PAINT_WIGGLE_DIST = 10;
 const int DIP_WIGGLE_DIST = 5;
-const int ROTATE_SERVO_HOME = 0;
+const int ROTATE_SERVO_HOME = 1;
+const int ARM_SERVO_UP = 80;
+const int ARM_SERVO_DOWN = 45;
 
 //// constants for the timer interrupt (used for brush wiggling)
 const unsigned char PRESCALER = (1 << CS22) | (1 << CS21) | (1 << CS20); //aka prescaler of 1024 to get 15.625kHz
@@ -89,7 +91,7 @@ const coord cMotorR = {MOTOR_R_X, MOTOR_R_Y};
 //// pin numbers
 const int PIN_BRUSH_SERVO = 2;
 const int PIN_ARM_SERVO = 3;
-const int PIN_ROTATE_SERVO = 4;
+const int PIN_ROTATE_SERVO = 8;
 //const int PIN_STEP_L[4] = {6,7,8,9};
 //const int PIN_STEP_R[4] = {10,11,12,13};
 const int PIN_MOTOR_L_STEP = 11;
