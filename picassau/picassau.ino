@@ -83,8 +83,8 @@ void loop()
       strokeDist = 0;
     }
     //now apply the brush to get ready for painting
-    applyBrush();
-    rotateBrush(getServoAngle(cCur, cDest));
+    applyBrushWithRotate(getServoAngle(cCur, cDest));
+    
     
     brushWiggle = true;
     wiggleDist = PAINT_WIGGLE_DIST;

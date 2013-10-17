@@ -13,8 +13,8 @@ typedef struct Coord { float x; float y; } coord;
 
 //// miscellaneous
 const int MAX_COLORS = 3; //how many paint colors?
-const int PAINT_MOTOR_DELAY = 80;//30; // in ms, time between stepping the motors
-const int MOVE_MOTOR_DELAY = 20; //moving, including going to the dipping checkpoint
+const int PAINT_MOTOR_DELAY = 40;//80; // in ms, time between stepping the motors
+const int MOVE_MOTOR_DELAY = 15; //20//moving, including going to the dipping checkpoint
 const int DIP_MOTOR_DELAY = 30; //just for the straight-down move while dipping
 const int CALIB_MOTOR_DELAY = 40; //used during calibration
 const long SERIAL_TIMEOUT = 1000; //serial time out in ms (aka how long to wait before sending another 'R')
@@ -51,7 +51,7 @@ const float PAINTING_DISTANCE = 500; //how far (in step-units) you can go before
 const int BPOS_APPLY = 70; //angle of the brush servo when the brush is applied
 const int BPOS_DIP = 160; //angle of the brush servo when dipping in paint
 const int BPOS_LIFT = 135; //angle of the brush servo when lifted
-const int PAINT_WIGGLE_DIST = 10;
+const int PAINT_WIGGLE_DIST = 5;
 const int DIP_WIGGLE_DIST = 5;
 const int ROTATE_SERVO_HOME = 1;
 const int ARM_SERVO_UP = 80;
@@ -71,9 +71,9 @@ const unsigned char OCR_VALUE = 156; //156 @ 15.625kHz = 100 Hz
   //const coord cPaint1 = {PAINT_X1+COORD_OFFSET_X, PAINT_Y+COORD_OFFSET_Y};
   //const coord cPaint2 = {PAINT_X2+COORD_OFFSET_X, PAINT_Y+COORD_OFFSET_Y};
   //const coord cPaint3 = {PAINT_X3+COORD_OFFSET_X, PAINT_Y+COORD_OFFSET_Y};
-const float PAINT_X1 = 172.4; //4.5
-const float PAINT_X2 = 293.6; //9.5
-const float PAINT_X3 = 414.8; //14.5
+const float PAINT_X1 = 194;//172.4; //4.5
+const float PAINT_X2 = 315;//293.6; //9.5
+const float PAINT_X3 = 436;//414.8; //14.5
 const float PAINT_Y = 1030; //40 - dipsteps //945+194
 const coord cPaint1 = {PAINT_X1, PAINT_Y};
 const coord cPaint2 = {PAINT_X2, PAINT_Y};

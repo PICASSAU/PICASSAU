@@ -110,6 +110,53 @@ void applyBrush()
 }
 
 //////////////////////////////////////////////////////////
+////applyBrushWithRotate
+///applies the brush and rotates just before lifting the arm back up
+void applyBrushWithRotate(int deg)
+{
+  if (brushSetting != BPOS_APPLY)
+  {
+    boolean interruptFlag = brushWiggle;
+    if ( interruptFlag )
+      brushWiggle = false;
+    
+    for (int i = ARM_SERVO_UP; i >= ARM_SERVO_DOWN; i--)
+    {
+      armServo.write(i);
+      delay(10);
+    }
+    
+    //slowly apply the brush to keep the carriage from bouncing
+    //off the poster
+    for (int i = 40; i >= 0; i--)
+    {
+      brushServo.write(BPOS_APPLY+i);
+      delay(20);
+    }
+    
+    rotateBrush(deg);
+    
+    for (int i = ARM_SERVO_DOWN; i <= ARM_SERVO_UP; i++)
+    {
+      armServo.write(i);
+      delay(10);
+    }
+    
+    brushSetting = BPOS_APPLY;
+    brushOffset = 0;
+    
+    delay(500);
+    
+    if (interruptFlag)
+      brushWiggle = true; //re-enable wiggle
+  }
+  else
+  {
+    rotateBrush(deg);
+  }
+}
+
+//////////////////////////////////////////////////////////
 ////removeBrush
 ///removes the brush
 void removeBrush()
@@ -124,6 +171,8 @@ void removeBrush()
       delay(10);
     }
   }
+  
+  rotateBrush(ROTATE_SERVO_HOME);
   
   brushServo.write(BPOS_LIFT);
   brushSetting = BPOS_LIFT;
@@ -150,6 +199,7 @@ void dipBrush()
   int brushPrevSetting = brushSetting;
   int prevWiggleDist = wiggleDist;
   boolean brushPrevWiggle = brushWiggle;
+  int prevBrushRotation = brushRotation;
   
   rotateBrush(ROTATE_SERVO_HOME);
   motorDelay = MOVE_MOTOR_DELAY;
@@ -211,7 +261,7 @@ void dipBrush()
   
   if (brushPrevSetting == BPOS_APPLY)
   {
-    applyBrush();
+    applyBrushWithRotate(prevBrushRotation);
     motorDelay = PAINT_MOTOR_DELAY;
   }
   brushWiggle = brushPrevWiggle;
@@ -222,8 +272,11 @@ void dipBrush()
 
 void rotateBrush(int deg)
 {
+  int dRot = brushRotation - deg;
   brushRotation = deg;
   rotateServo.write(deg);
+  if (dRot > 5) //if we move more than 5 degrees
+    delay( dRot*3 );
   //Serial.print("deg: ");
   //Serial.println(deg);
 }
