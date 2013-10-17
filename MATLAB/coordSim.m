@@ -105,6 +105,9 @@ ycd2 = str2num(pyLineData);  %turn string into numeric array
 ycd2 = transpose(ycd2);  %it's easier to work with column vectors
 ycd2 = -1.*ycd2;  %negate y-coords because our coord system is upside down
 
+
+fclose(pyOutFile);
+
 %=========================================
 % three for-loops to plot the three colors
 %=========================================
@@ -117,6 +120,8 @@ if length(cmd0) > 1
             set(seg,'Color',[0,0,.50]);  %dark blue
             set(seg,'LineWidth',10);  %default is 0.5
             %set(seg,'Marker','x');  %makes counting line segments easier
+            xlim([0 744.09448]);
+            ylim([-1052.3622 0]);
         end
     end
 end
@@ -130,6 +135,8 @@ if length(cmd1) > 1
             set(seg,'Color',[.25,.41,.88]);  %light blue
             set(seg,'LineWidth',10);  %default is 0.5
             set(seg,'Marker','.');  %makes counting line segments easier
+            xlim([0 744.09448]);
+            ylim([-1052.3622 0]);
         end
     end
 end
@@ -143,6 +150,10 @@ if length(cmd2) > 1
             set(seg,'Color',[1,.65,0]);  %burnt orange
             set(seg,'LineWidth',10);  %default is 0.5
             set(seg,'Marker','.');  %makes counting line segments easier
+            xlim([0 744.09448]);
+            ylim([-1052.3622 0]);
         end
     end
 end
+
+

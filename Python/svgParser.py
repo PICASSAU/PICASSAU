@@ -186,7 +186,7 @@ def main():
 
     mySVG = svgParser()
     #load in file - here I'm doing it manually
-    file = "C:\Users\Kayla\Documents\GitHub\PICASSAU\svg\sketch1.svg"
+    file = "../svg/sketch1.svg"
 
     #N sets how many sections curves are divided into
     N = 10
@@ -357,7 +357,11 @@ def main():
                 lastElemLet = False
 
     #output the command/coordinate info to a file called "pythonOutput"
-    file = open('pythonOutput.txt', 'w')
+
+    outputFileName = '..\MATLAB\pythonOutput.txt'
+    if os.path.isfile(outputFileName):
+        os.remove(outputFileName)
+    file = open(outputFileName, 'w')
 
     file.write("commands0 = [")
     mySVG.writeToFile(file, mySVG.commands0)
