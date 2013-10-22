@@ -75,9 +75,12 @@ const float PAINT_X1 = 194;//172.4; //4.5
 const float PAINT_X2 = 315;//293.6; //9.5
 const float PAINT_X3 = 436;//414.8; //14.5
 const float PAINT_Y = 1030; //40 - dipsteps //945+194
+const float WATER_X = 532;//115.15+PAINTX3
+const float WATER_Y = 994;//PAINT_Y-36
 const coord cPaint1 = {PAINT_X1, PAINT_Y};
 const coord cPaint2 = {PAINT_X2, PAINT_Y};
 const coord cPaint3 = {PAINT_X3, PAINT_Y};
+const coord cWater = {WATER_X, WATER_Y};
 const int DIP_STEPS = 100; //number of steps down from cPaint to move to dip brush
 
 //// coordinates of motors (useful when calculating line lengths)

@@ -270,6 +270,71 @@ void dipBrush()
 //  brushSetting = brushPrevSetting;
 }
 
+//////////////////////////////////////////////////////////
+////washBrush
+///washes the brush in the water
+void washBrush()
+{
+  int brushPrevSetting = brushSetting;
+  int prevWiggleDist = wiggleDist;
+  boolean brushPrevWiggle = brushWiggle;
+  int prevBrushRotation = brushRotation;
+  
+  rotateBrush(ROTATE_SERVO_HOME);
+  motorDelay = MOVE_MOTOR_DELAY;
+  
+  removeBrush(); //go to removed position first (includes pushing away from canvas if needed)
+  
+  brushWiggle = false;
+  brushServo.write(BPOS_DIP);
+  brushSetting = BPOS_DIP;
+  brushOffset = 0;
+  
+  coord cReturn = cCur;
+  
+  moveToPoint(cWater);
+  
+  for(int i = 0; i < DIP_STEPS; i++)
+  {
+    motorLStep(1);
+    motorRStep(1);
+    delay(DIP_MOTOR_DELAY);
+  }
+  
+//  delay(1000);
+  //Serial.println("wiggling...");
+  
+  brushWiggle = true;
+  wiggleDist = DIP_WIGGLE_DIST;
+  delay(1000);
+//  Serial.println("raising...");
+  delay(1000);
+  
+  for(int i = 0; i < DIP_STEPS; i++)
+  {
+    motorLStep(-1);
+    motorRStep(-1);
+    delay(DIP_MOTOR_DELAY);
+  }
+  
+  brushWiggle = false;
+//  delay(500);
+//  Serial.println("returning...");
+  delay(500);
+  
+  removeBrush();
+  
+  moveToPoint(cReturn);
+  
+  if (brushPrevSetting == BPOS_APPLY)
+  {
+    applyBrushWithRotate(prevBrushRotation);
+    motorDelay = PAINT_MOTOR_DELAY;
+  }
+  brushWiggle = brushPrevWiggle;
+  wiggleDist = prevWiggleDist;
+}
+
 void rotateBrush(int deg)
 {
   int dRot = brushRotation - deg;

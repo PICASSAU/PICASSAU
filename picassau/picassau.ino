@@ -42,6 +42,7 @@ void setup()
   serialSetup();  //set up the serial stuff
   brushSetup(); //set up the brushes
   plottingSetup(); //set up the stepper motors
+  washBrush();
   dipBrush();
 }
 
@@ -106,7 +107,9 @@ void loop()
   {
     if (newColor != currentColor)
     {
-      //do some color changing stuff
+      washBrush();
+      currentColor = newColor;
+      dipBrush();
     }
     //otherwise it doesn't matter
   }
