@@ -59,6 +59,7 @@ class svgParser:
             tempFile.close()
             return output
         else:
+            print file + " does not exist"
             return
 
     def parsePaths(self, svgStr):
@@ -78,6 +79,11 @@ class svgParser:
         self.scaleY = (self.canvasY/float(self.fileHeight[0]))*self.ardDist
         self.grabbedColors = [path.getAttribute('stroke') for path in
                               doc.getElementsByTagName('path')]
+        if not 'stroke' in self.grabbedColors:
+            self.grabbedStyles = [path.getAttribute('style') for path in
+                                  doc.getElementsByTagName('path')]
+            self.grabbedColors =  [style.split('stroke:')[1]
+                                   for style in self.grabbedStyles]
         doc.unlink()
         return pathStrings
 
@@ -181,12 +187,11 @@ class svgParser:
         file.write("]\n")
 
 
-
 def main():
 
     mySVG = svgParser()
     #load in file - here I'm doing it manually
-    file = "../svg/sketch1.svg"
+    file = "../svg/curvySVG.svg"
 
     #N sets how many sections curves are divided into
     N = 10
@@ -385,14 +390,15 @@ def main():
     mySVG.writeToFile(file, mySVG.yCoords2)
 
     file.close()
-
 '''
+
     #start talking to Arduino
     print "Start talking to Arduino"
 
     #Color 0
     index = 0 #this index refers to the number command we're on as we iterate
               #through the arrays (command, xcoords, ycoords)
+
     for eachComm in mySVG.commands0: #for each command...
         #reset the output and check variables
         serOut = None
@@ -479,6 +485,11 @@ def main():
         readyByte = None
         print ardCheck
 
+
+    readyByte = mySVG.ser.read() #read 1 byte from Arduino
+    while readyByte is not 'R':
+        readyByte = mySVG.ser.read() #wait for the ready signal from the Arduino #wait for the ready signal from the Arduino
+    print "got ready signal"
     mySVG.ser.write('D\n')
     ardCheck = mySVG.readFromArduino()
     while 'D' not in ardCheck:
@@ -487,7 +498,6 @@ def main():
     mySVG.ser.write('G\n')
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
-
 '''
 
 if __name__ == '__main__':
