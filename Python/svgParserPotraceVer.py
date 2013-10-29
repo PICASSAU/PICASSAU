@@ -19,6 +19,9 @@ from xml.dom import minidom
 class svgParser:
     def __init__(self):
 
+        #load in file - here I'm doing it manually
+        self.SVGfile = "../svg/fox.svg"
+
         #instantiate some arrays we'll use
         self.commands0 = ['C']
         self.xCoords0 = [0]
@@ -34,6 +37,11 @@ class svgParser:
 
         self.grabbedColors = []
         self.colors= []
+
+        self.xtranslate = 0
+        self.xSVGscale = 0
+        self.ytranslate = 0
+        self.ySVGscale = 0
 
         #use these variables to scale the instructions for the Arduino
         #these need to be floats, so include a decmial point
@@ -73,8 +81,12 @@ class svgParser:
                        doc.getElementsByTagName('path')]
         self.fileWidth = [path.getAttribute('width') for path in
                           doc.getElementsByTagName('svg')]
+        self.fileWidth[0] = self.fileWidth[0].split('p')[0]
         self.fileHeight = [path.getAttribute('height') for path in
                            doc.getElementsByTagName('svg')]
+        self.fileHeight[0] = self.fileHeight[0].split('p')[0]
+        self.transform = [path.getAttribute('transform') for path in
+                          doc.getElementsByTagName('g')]
         self.scaleX = (self.canvasX/float(self.fileWidth[0]))*self.ardDist
         self.scaleY = (self.canvasY/float(self.fileHeight[0]))*self.ardDist
         self.grabbedColors = [path.getAttribute('stroke') for path in
@@ -82,11 +94,34 @@ class svgParser:
         if not 'stroke' in self.grabbedColors:
             self.grabbedStyles = [path.getAttribute('style') for path in
                                   doc.getElementsByTagName('path')]
-            if not self.grabbedStyles:
+            if self.grabbedStyles:
                 self.grabbedColors =  [style.split('stroke:')[1]
                                        for style in self.grabbedStyles]
         doc.unlink()
         return pathStrings
+
+    def parseTransform(self):
+        '''
+        This function will decipher the transform from the SVG.
+
+        '''
+
+        #remove the transform attribute from the array to just a string
+        self.transform = str(self.transform[0])
+
+        #split the transform string on the close parenthesis to get the first
+        #transform command
+        transformMatrix = self.transform.split('(')[1]
+
+        #the matrix is as follows:
+        #(xscale, ?, xtranslate, yscale, ?, ytranslate)
+        #so parse accordingly:
+        self.xSVGscale = transformMatrix.split(',')[0]
+        self.xtranslate = transformMatrix.split(',')[2]
+        self.ySVGscale = transformMatrix.split(',')[3]
+        self.ytranslate = (transformMatrix.split(',')[5]).split(')')[0]
+
+        return
 
     def evalCurveEqtn(self, t, PArray):
         '''
@@ -108,6 +143,17 @@ class svgParser:
         '''
         x = int(0.5+(float(str.split(',')[0])))
         y = int(0.5+(float(str.split(',')[1])))
+
+        if self.xtranslate:
+            x += float(self.xtranslate)
+        if self.ytranslate:
+            y += float(self.ytranslate)
+
+        if self.xSVGscale:
+            x = (x*float(self.xSVGscale))
+        if self.ySVGscale:
+            y = (y*(-1)*float(self.ySVGscale))
+
         return x,y
 
     def capFirstLetOnly(self, str):
@@ -191,8 +237,6 @@ class svgParser:
 def main():
 
     mySVG = svgParser()
-    #load in file - here I'm doing it manually
-    file = "../svg/world.svg"
 
     #N sets how many sections curves are divided into
     N = 10
@@ -221,8 +265,10 @@ def main():
     pathFirstYCoord = 0
 
     #read in the file and parse out the paths into an array of strings
-    svgStr = mySVG.readInFile(file)
+    svgStr = mySVG.readInFile(mySVG.SVGfile)
     pathStrings = mySVG.parsePaths(svgStr)
+    if mySVG.transform[0]:
+        mySVG.parseTransform()
 
     #iteratively run through the paths, correct letters, and reorganize
     #into the different arrays
@@ -391,7 +437,7 @@ def main():
     mySVG.writeToFile(file, mySVG.yCoords2)
 
     file.close()
-'''
+
 
     #start talking to Arduino
     print "Start talking to Arduino"
@@ -499,7 +545,7 @@ def main():
     mySVG.ser.write('G\n')
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
-'''
+
 
 if __name__ == '__main__':
     main()
