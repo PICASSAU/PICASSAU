@@ -20,7 +20,7 @@ class svgParser:
     def __init__(self):
 
         #load in file - here I'm doing it manually
-        self.SVGfile = "../svg/fox.svg"
+        self.SVGfile = "../svg/demoPic.svg"
 
         #instantiate some arrays we'll use
         self.commands0 = ['C']
@@ -145,14 +145,15 @@ class svgParser:
         y = int(0.5+(float(str.split(',')[1])))
 
         if self.xtranslate:
-            x += float(self.xtranslate)
+            x -= float(self.xtranslate)
         if self.ytranslate:
-            y += float(self.ytranslate)
+            y -= float(self.ytranslate)
 
-        if self.xSVGscale:
+        if self.xSVGscale != '0':
             x = (x*float(self.xSVGscale))
-        if self.ySVGscale:
-            y = (y*(-1)*float(self.ySVGscale))
+        if self.ySVGscale != '0':
+            y = (y*float(self.ySVGscale))
+        y = -y
 
         return x,y
 
@@ -438,7 +439,7 @@ def main():
 
     file.close()
 
-
+'''
     #start talking to Arduino
     print "Start talking to Arduino"
 
@@ -546,6 +547,6 @@ def main():
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
 
-
+'''
 if __name__ == '__main__':
     main()
