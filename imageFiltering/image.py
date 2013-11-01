@@ -89,11 +89,12 @@ while rval:
 	rval, frame = vc.read()
 	key = cv2.waitKey(30)
 	if key != -1:
+		key = key & 0xff
 		strKey = str(key)
 
-	if key == 1048603: #ESC
+	if key == 27: #ESC
 		break
-	if key == 1048608: #this is space... bar
+	if key == 32: #this is space... bar
 		imageStrEnd = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d-%H%M%S') + ".png"
 		imBin1 = np.zeros_like(imMorphed)
 		imBin2 = np.zeros_like(imMorphed)
@@ -113,3 +114,15 @@ while rval:
 #		cv2.imwrite(("picPoster"+imageStrEnd), imPost)
 #		cv2.imwrite(("picColor"+imageStrEnd), imColorize)
 
+	if key == 10: #enter
+		imBin1 = np.zeros_like(imMorphed)
+		imBin2 = np.zeros_like(imMorphed)
+		imBin3 = np.zeros_like(imMorphed)
+		
+		imBin1[imMorphed == 170] = 255
+		imBin2[imMorphed == 85] = 255
+		imBin3[imMorphed == 0] = 255
+
+		cv2.imwrite(("./binIm/layer1.png"),imBin1)
+		cv2.imwrite(("./binIm/layer2.png"),imBin2)
+		cv2.imwrite(("./binIm/layer3.png"),imBin3)
