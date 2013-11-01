@@ -20,7 +20,7 @@ class svgParser:
     def __init__(self):
 
         #load in file - here I'm doing it manually
-        self.SVGfile = "../svg/demoPic.svg"
+        self.SVGfile = "../svg/Star1-1.svg"
 
         #instantiate some arrays we'll use
         self.commands0 = ['C']
@@ -91,10 +91,10 @@ class svgParser:
         self.scaleY = (self.canvasY/float(self.fileHeight[0]))*self.ardDist
         self.grabbedColors = [path.getAttribute('stroke') for path in
                               doc.getElementsByTagName('path')]
-        if not 'stroke' in self.grabbedColors:
+        if not 'stroke' in self.grabbedColors[0]:
             self.grabbedStyles = [path.getAttribute('style') for path in
                                   doc.getElementsByTagName('path')]
-            if self.grabbedStyles:
+            if  'stroke' in self.grabbedStyles[0]:
                 self.grabbedColors =  [style.split('stroke:')[1]
                                        for style in self.grabbedStyles]
         doc.unlink()
@@ -144,16 +144,20 @@ class svgParser:
         x = int(0.5+(float(str.split(',')[0])))
         y = int(0.5+(float(str.split(',')[1])))
 
-        if self.xtranslate:
-            x -= float(self.xtranslate)
-        if self.ytranslate:
-            y -= float(self.ytranslate)
+        self.xtranslate = 0
+        self.ytranslate = 0
+        self.xSVGscale = 0.38402718776550552251486830926083
+        self.ySVGscale = 0.2
 
-        if self.xSVGscale != '0':
+        if self.xtranslate:
+            x = x - float(self.xtranslate)
+        if self.ytranslate:
+            y = y - float(self.ytranslate)
+
+        if (self.xSVGscale != '0') and (self.xSVGscale != 0):
             x = (x*float(self.xSVGscale))
-        if self.ySVGscale != '0':
+        if (self.ySVGscale != '0') and (self.ySVGscale != 0):
             y = (y*float(self.ySVGscale))
-        y = -y
 
         return x,y
 
@@ -408,6 +412,43 @@ def main():
                     pathFirstCoordFlag = False
 
                 lastElemLet = False
+
+    #debugging
+    xsum = 0
+    xmax = 0
+    xavg = 0
+    xmin = 100000
+    ysum = 0
+    ymax = 0
+    yavg = 0
+    ymin = 1000000
+    for y in mySVG.yCoords0:
+        if ymax < y:
+            ymax = y
+        ysum += y
+        if ymin > y:
+            ymin = y
+        if y == 0:
+            print 'y=0!!!!!'
+    for x in mySVG.xCoords0:
+        if xmax < x:
+            xmax = x
+        xsum += x
+        if xmin > x:
+            xmin = x
+        if x == 0:
+            print 'x=0!!!!!'
+    xavg = xsum/(len(mySVG.xCoords0))
+    yavg = ysum/(len(mySVG.yCoords0))
+
+    print 'xmax = ' + str(xmax)
+    print 'xavg = ' + str(xavg)
+    print 'xmin = ' + str(xmin)
+    print 'ymax = ' + str(ymax)
+    print 'yavg = ' + str(yavg)
+    print 'ymin = ' + str(ymin)
+
+
 
     #output the command/coordinate info to a file called "pythonOutput"
 
