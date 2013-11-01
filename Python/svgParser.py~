@@ -44,7 +44,7 @@ class svgParser:
         self.fileWidth = 1 #default file width - found in svg file
         self.fileHeight = 1 #default file height - found in svg file
 
-        #self.ser = serial.Serial('COM5') #9600 Baud, 8 data bits, No parity, 1 stop bit
+        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
 
     def readInFile(self, file):
@@ -82,9 +82,8 @@ class svgParser:
         if not 'stroke' in self.grabbedColors:
             self.grabbedStyles = [path.getAttribute('style') for path in
                                   doc.getElementsByTagName('path')]
-            if not self.grabbedStyles:
-                self.grabbedColors =  [style.split('stroke:')[1]
-                                       for style in self.grabbedStyles]
+            self.grabbedColors =  [style.split('stroke:')[1]
+                                   for style in self.grabbedStyles]
         doc.unlink()
         return pathStrings
 
@@ -192,7 +191,7 @@ def main():
 
     mySVG = svgParser()
     #load in file - here I'm doing it manually
-    file = "../svg/world.svg"
+    file = "../svg/fox.svg"
 
     #N sets how many sections curves are divided into
     N = 10
@@ -391,7 +390,7 @@ def main():
     mySVG.writeToFile(file, mySVG.yCoords2)
 
     file.close()
-'''
+
 
     #start talking to Arduino
     print "Start talking to Arduino"
@@ -499,7 +498,7 @@ def main():
     mySVG.ser.write('G\n')
     mySVG.ser.close() #when you're done with everything, close the serial connection
     print "done"
-'''
+
 
 if __name__ == '__main__':
     main()
