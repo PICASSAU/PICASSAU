@@ -44,10 +44,10 @@ def main():
 
     root = Tk.Tk()
     ex = Example(root)
-    text1 = Tk.Label(root, text="Take Picture")
+    text1 = Tk.Label(root, text="Take Picture", font=("Helvetica", 16, "bold"))
     text1.grid(row = 0, column = 1)
 
-    text2 = Tk.Label(root, text="Continue")
+    text2 = Tk.Label(root, text="Continue", font=("Helvetica", 16, "bold"))
     text2.grid(row = 2, column = 1)
     ex.setGeometry(root)
 
@@ -57,3 +57,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+font=("Helvetica", 16)
