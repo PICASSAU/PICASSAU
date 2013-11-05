@@ -19,6 +19,9 @@ class Example(Tk.Frame):
 
         self.parent = parent
         self.initPic()
+        self.xmax = 640
+        self.ymax = 480
+        self.cropConstant = 20/26
 
     def initPic(self):
 
@@ -27,6 +30,7 @@ class Example(Tk.Frame):
         self.parent.title("Label")
 
         self.img = Image.open(imageName)
+        self.imgCropped = Image.crop(0, 0, self.xmax*self.cropConstant, self.ymax)
         self.filteredImage = ImageTk.PhotoImage(self.img)
         labelImage = Tk.Label(image=self.filteredImage)
 
@@ -45,7 +49,6 @@ def main():
     root = Tk.Tk()
     ex = Example(root)
     text1 = Tk.Label(root, text="Take Picture", font=("Helvetica", 16, "bold"))
-    text1.grid(row = 0, column = 1)
 
     text2 = Tk.Label(root, text="Continue", font=("Helvetica", 16, "bold"))
     text2.grid(row = 2, column = 1)
@@ -57,4 +60,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-font=("Helvetica", 16)
