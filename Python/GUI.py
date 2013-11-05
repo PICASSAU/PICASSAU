@@ -19,18 +19,20 @@ class Example(Tk.Frame):
 
         self.parent = parent
         self.initPic()
-        self.xmax = 640
-        self.ymax = 480
-        self.cropConstant = 20/26
 
     def initPic(self):
 
         imageName = "../imageFiltering/teamTestPic.png"
 
+        self.xmax = 640
+        self.ymax = 480
+        self.cropConstant = 20/26
+
+
         self.parent.title("Label")
 
         self.img = Image.open(imageName)
-        self.imgCropped = Image.crop(0, 0, self.xmax*self.cropConstant, self.ymax)
+        self.imgCropped = self.img.crop((5, 5, self.xmax*self.cropConstant, self.ymax))
         self.filteredImage = ImageTk.PhotoImage(self.img)
         labelImage = Tk.Label(image=self.filteredImage)
 
