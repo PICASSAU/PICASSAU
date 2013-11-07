@@ -24,11 +24,11 @@ class Example(Tk.Frame):
 
         imageName = "../imageFiltering/teamTestPic.png"
 
-        self.xmax = 640
-        self.ymax = 480
+        self.xmax = 160
+        self.ymax = 120
         self.cropConstant = (20.0/26.0)
         self.croppedX = int(self.ymax*self.cropConstant)
-        box = (0, 0, self.croppedX, self.ymax)
+        box = (0, 0, self.xmax, self.ymax)
 
 
         self.parent.title("Label")
@@ -52,10 +52,10 @@ def main():
 
     root = Tk.Tk()
     ex = Example(root)
-    text1 = Tk.Label(root, text="Take Picture ------->", font=("Helvetica", 20, "bold"))
+    text1 = Tk.Label(root, text="         Take Picture ", font=("Helvetica", 20, "bold"))
     text1.grid(row = 0, column = 2)
 
-    text2 = Tk.Label(root, text="Continue ------->", font=("Helvetica", 20, "bold"))
+    text2 = Tk.Label(root, text="         Continue ", font=("Helvetica", 20, "bold"))
     text2.grid(row = 2, column = 2)
     ex.setGeometry(root)
 
