@@ -14,6 +14,7 @@
 char command = 0;
 coord cDest; //destination coordinates
 coord cCur; //current coordinates
+coord cPrev; //previous destination coordinates
 
 int motorDelay = MOVE_MOTOR_DELAY;
 
@@ -42,13 +43,15 @@ void setup()
   serialSetup();  //set up the serial stuff
   brushSetup(); //set up the brushes
   plottingSetup(); //set up the stepper motors
-  washBrush();
+//  washBrush();
   dipBrush();
 }
 
 void loop()
 {
   serialReady(); //let the comp know that you're ready
+  
+  cPrev = cDest;
   
   do //get instruction and verify it
   {
@@ -84,7 +87,7 @@ void loop()
       strokeDist = 0;
     }
     //now apply the brush to get ready for painting
-    applyBrushWithRotate(getServoAngle(cCur, cDest));
+    applyBrushWithRotate(getServoAngle(cPrev, cDest));
     
     
     brushWiggle = true;
@@ -102,14 +105,16 @@ void loop()
   {
     brushWiggle = false;
     removeBrush();
+    delay(500);
+    washBrush();
   }
   if (command == 'C') //c for color change
   {
     if (newColor != currentColor)
     {
-      washBrush();
       currentColor = newColor;
-      dipBrush();
+      washBrushWithDip();
+      strokeDist = 0;
     }
     //otherwise it doesn't matter
   }

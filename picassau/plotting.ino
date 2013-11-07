@@ -320,6 +320,34 @@ boolean positionCalibration()
     return finePositionCalibration();
   }
   
+  //at this point it has calibrated the y, and fine-tuned the x
+  //for better precision, let's re-calibrate the y
+  
+  //send it back down below the sensor
+  for(int i = 0; i < 2*CALIBRATION_ADJUSTMENT_STEPS; i++)
+  {
+    motorLStep(1);
+    motorRStep(1);
+    delay(motorDelay);
+  }
+  //now come back up
+  delay(1000);
+  while (analogRead(PIN_IR_SENSOR) <= IR_THRESHOLD) //while it's not seen
+  {
+    motorLStep(-1);
+    motorRStep(-1);
+    delay(motorDelay);
+  }
+  
+  for(int i = 0; i < CALIBRATION_ADJUSTMENT_STEPS; i++)
+  {
+    motorLStep(-1);
+    motorRStep(-1);
+    delay(motorDelay);
+  }
+  
+  //now the y coord (IR_Y) should be more accurate
+  
   return true;
 } 
   
@@ -408,6 +436,34 @@ boolean finePositionCalibration()
     moveToPoint(cAdjust);
     return finePositionCalibration();
   }
+  
+  //at this point it has calibrated the y, and fine-tuned the x
+  //for better precision, let's re-calibrate the y
+  
+  //send it back down below the sensor
+  for(int i = 0; i < 2*CALIBRATION_ADJUSTMENT_STEPS; i++)
+  {
+    motorLStep(1);
+    motorRStep(1);
+    delay(motorDelay);
+  }
+  delay(1000);
+  //now come back up
+  while (analogRead(PIN_IR_SENSOR) <= IR_THRESHOLD) //while it's not seen
+  {
+    motorLStep(-1);
+    motorRStep(-1);
+    delay(motorDelay);
+  }
+  
+  for(int i = 0; i < CALIBRATION_ADJUSTMENT_STEPS; i++)
+  {
+    motorLStep(-1);
+    motorRStep(-1);
+    delay(motorDelay);
+  }
+  
+  //now the y coord (IR_Y) should be more accurate
   
   return true;
 }

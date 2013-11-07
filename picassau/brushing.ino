@@ -172,7 +172,7 @@ void removeBrush()
     }
   }
   
-  rotateBrush(ROTATE_SERVO_HOME);
+  hardRotateBrush(ROTATE_SERVO_HOME);
   
   brushServo.write(BPOS_LIFT);
   brushSetting = BPOS_LIFT;
@@ -201,7 +201,7 @@ void dipBrush()
   boolean brushPrevWiggle = brushWiggle;
   int prevBrushRotation = brushRotation;
   
-  rotateBrush(ROTATE_SERVO_HOME);
+  hardRotateBrush(ROTATE_SERVO_HOME);
   motorDelay = MOVE_MOTOR_DELAY;
   
   removeBrush(); //go to removed position first (includes pushing away from canvas if needed)
@@ -255,7 +255,7 @@ void dipBrush()
 //  Serial.println("returning...");
   delay(500);
   
-  removeBrush();
+  dabBrush();
   
   moveToPoint(cReturn);
   
@@ -280,7 +280,7 @@ void washBrush()
   boolean brushPrevWiggle = brushWiggle;
   int prevBrushRotation = brushRotation;
   
-  rotateBrush(ROTATE_SERVO_HOME);
+  hardRotateBrush(ROTATE_SERVO_HOME);
   motorDelay = MOVE_MOTOR_DELAY;
   
   removeBrush(); //go to removed position first (includes pushing away from canvas if needed)
@@ -292,7 +292,146 @@ void washBrush()
   
   coord cReturn = cCur;
   
+  washingWithWipe();
+  removeBrush();
+  
+//  moveToPoint(cReturn);
+//  
+//  if (brushPrevSetting == BPOS_APPLY)
+//  {
+//    applyBrushWithRotate(prevBrushRotation);
+//    motorDelay = PAINT_MOTOR_DELAY;
+//  }
+//  brushWiggle = brushPrevWiggle;
+//  wiggleDist = prevWiggleDist;
+}
+
+//////////////////////////////////////////////////////////
+////washBrushWithDip
+///washes the brush in the water then dips
+void washBrushWithDip()
+{
+  int brushPrevSetting = brushSetting;
+  int prevWiggleDist = wiggleDist;
+  boolean brushPrevWiggle = brushWiggle;
+  int prevBrushRotation = brushRotation;
+  
+  hardRotateBrush(ROTATE_SERVO_HOME);
+  motorDelay = MOVE_MOTOR_DELAY;
+  
+  removeBrush(); //go to removed position first (includes pushing away from canvas if needed)
+  
+  brushWiggle = false;
+  brushServo.write(BPOS_DIP);
+  brushSetting = BPOS_DIP;
+  brushOffset = 0;
+  
+  coord cReturn = cCur;
+  
+  washingWithWipe();
+  
+//  removeBrush();
+  
+  if (currentColor == 0)
+    moveToPoint(cPaint1);
+  else if (currentColor == 1)
+    moveToPoint(cPaint2);
+  else if (currentColor == 2)
+    moveToPoint(cPaint3);
+    
+  brushServo.write(BPOS_DIP);
+  brushSetting = BPOS_DIP;
+  brushOffset = 0;
+  
+  for(int i = 0; i < DIP_STEPS; i++)
+  {
+    motorLStep(1);
+    motorRStep(1);
+    delay(DIP_MOTOR_DELAY);
+  }
+  
+  brushWiggle = true;
+  wiggleDist = DIP_WIGGLE_DIST;
+  delay(1000);
+  delay(1000);
+  
+  for(int i = 0; i < DIP_STEPS; i++)
+  {
+    motorLStep(-1);
+    motorRStep(-1);
+    delay(DIP_MOTOR_DELAY);
+  }
+  
+  brushWiggle = false;
+  delay(500);
+  
+  dabBrush();
+  
+  moveToPoint(cReturn);
+  
+//  if (brushPrevSetting == BPOS_APPLY)
+//  {
+//    applyBrushWithRotate(prevBrushRotation);
+//    motorDelay = PAINT_MOTOR_DELAY;
+//  }
+//  brushWiggle = brushPrevWiggle;
+//  wiggleDist = prevWiggleDist;
+  
+}
+
+void rotateBrush(int deg)
+{
+  if ((brushRotation > 175) && (deg < 5))
+    deg = 180;
+  if ((brushRotation < 5) && (deg > 175))
+    deg = 0;
+  int dRot = brushRotation - deg;
+  brushRotation = deg;
+  rotateServo.write(deg);
+  if (dRot > 5) //if we move more than 5 degrees
+    delay( dRot*3 );
+}
+
+void hardRotateBrush(int deg)
+{
+  brushRotation = deg;
+  rotateServo.write(deg);
+}
+
+void  dabBrush()
+{
+  for (int i = ARM_SERVO_UP; i <= ARM_SERVO_DOWN; i--)
+  {
+    armServo.write(i);
+    delay(10);
+  }
+  brushServo.write(BPOS_APPLY);
+  for (int i = ARM_SERVO_DOWN; i <= ARM_SERVO_UP; i++)
+  {
+    armServo.write(i);
+    delay(10);
+  }
+  delay(1000);
+  for (int i = ARM_SERVO_UP; i <= ARM_SERVO_DOWN; i--)
+  {
+    armServo.write(i);
+    delay(10);
+  }
+  removeBrush();
+  for (int i = ARM_SERVO_DOWN; i <= ARM_SERVO_UP; i++)
+  {
+    armServo.write(i);
+    delay(10);
+  }
+}
+
+void washing()
+{
   moveToPoint(cWater);
+  
+  brushServo.write(BPOS_DIP);
+  brushSetting = BPOS_DIP;
+  brushOffset = 0;
   
   for(int i = 0; i < DIP_STEPS; i++)
   {
@@ -306,9 +445,7 @@ void washBrush()
   
   brushWiggle = true;
   wiggleDist = DIP_WIGGLE_DIST;
-  delay(1000);
-//  Serial.println("raising...");
-  delay(1000);
+  delay(3000);
   
   for(int i = 0; i < DIP_STEPS; i++)
   {
@@ -322,28 +459,72 @@ void washBrush()
 //  Serial.println("returning...");
   delay(500);
   
-  removeBrush();
   
-  moveToPoint(cReturn);
-  
-  if (brushPrevSetting == BPOS_APPLY)
-  {
-    applyBrushWithRotate(prevBrushRotation);
-    motorDelay = PAINT_MOTOR_DELAY;
-  }
-  brushWiggle = brushPrevWiggle;
-  wiggleDist = prevWiggleDist;
 }
 
-void rotateBrush(int deg)
+void washingWithWipe()
 {
-  int dRot = brushRotation - deg;
-  brushRotation = deg;
-  rotateServo.write(deg);
-  if (dRot > 5) //if we move more than 5 degrees
-    delay( dRot*3 );
-  //Serial.print("deg: ");
-  //Serial.println(deg);
+  washing();
+  
+  brushWiggle = false;
+  brushServo.write(BPOS_LIFT);
+  brushSetting = BPOS_LIFT;
+  
+  if (currentColor == 1)
+    moveToPoint(cWipeBL);
+  else if (currentColor == 2)
+    moveToPoint(cWipeBR);
+    
+  brushServo.write(BPOS_APPLY);
+  brushSetting = BPOS_APPLY;
+  brushOffset = 0;
+  wiggleDist = WIPE_WIGGLE_DIST;
+  brushWiggle = true;
+  
+  delay(1000);
+  armServo.write(ARM_SERVO_DOWN);
+  delay(200);
+  armServo.write(ARM_SERVO_UP);
+  delay(3000);
+  armServo.write(ARM_SERVO_DOWN);
+  delay(200);
+  armServo.write(ARM_SERVO_UP);
+  delay(1000);
+  
+  brushWiggle = false;
+  brushServo.write(BPOS_LIFT);
+  brushSetting = BPOS_LIFT;
+  
+  washing();
+  
+  brushWiggle = false;
+  brushServo.write(BPOS_LIFT);
+  brushSetting = BPOS_LIFT;
+  
+  if (currentColor == 1)
+    moveToPoint(cWipeTL);
+  else if (currentColor == 2)
+    moveToPoint(cWipeTR);
+  
+  brushServo.write(BPOS_APPLY);
+  brushSetting = BPOS_APPLY;
+  brushOffset = 0;
+  wiggleDist = WIPE_WIGGLE_DIST;
+  brushWiggle = true;
+  
+  delay(1000);
+  armServo.write(ARM_SERVO_DOWN);
+  delay(200);
+  armServo.write(ARM_SERVO_UP);
+  delay(3000);
+  armServo.write(ARM_SERVO_DOWN);
+  delay(200);
+  armServo.write(ARM_SERVO_UP);
+  delay(1000);
+  
+  brushWiggle = false;
+  brushServo.write(BPOS_LIFT);
+  brushSetting = BPOS_LIFT;
 }
-
+  
 

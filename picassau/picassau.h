@@ -36,11 +36,11 @@ const int STEP_THRESH = 0;
 
 // (0,0) is at the left spindle guide in absolute coordinates
 const int COORD_OFFSET_X = 115; //so at what coordinates is the top left
-const int COORD_OFFSET_Y = 250;//194; // corner of the canvas?
+const int COORD_OFFSET_Y = 290;//194; // corner of the canvas?
 
 //// calibration and sensor stuff
-const int IR_X = 85; //3.5 inches
-const int IR_Y = 733; //30.25 inches
+const int IR_X = 95;//85; //3.5 inches
+const int IR_Y = 763; //30.25 inches
 const int IR_THRESHOLD = 150; //the ADC reading threshold to decide whether or not it sees anything during calibration
 const int MAX_CALIBRATION_STEPS = 558; //max upward movement during calib. before assuming you started above
 const int CALIBRATION_ADJUSTMENT_STEPS = 35; //how much to move slightly up to center itself on the sensor in calibration
@@ -53,6 +53,7 @@ const int BPOS_DIP = 160; //angle of the brush servo when dipping in paint
 const int BPOS_LIFT = 135; //angle of the brush servo when lifted
 const int PAINT_WIGGLE_DIST = 5;
 const int DIP_WIGGLE_DIST = 5;
+const int WIPE_WIGGLE_DIST = 10;
 const int ROTATE_SERVO_HOME = 1;
 const int ARM_SERVO_UP = 80;
 const int ARM_SERVO_DOWN = 45;
@@ -74,14 +75,24 @@ const unsigned char OCR_VALUE = 156; //156 @ 15.625kHz = 100 Hz
 const float PAINT_X1 = 194;//172.4; //4.5
 const float PAINT_X2 = 315;//293.6; //9.5
 const float PAINT_X3 = 436;//414.8; //14.5
-const float PAINT_Y = 1030; //40 - dipsteps //945+194
+const float PAINT_Y = 1035; //40 - dipsteps //945+194
 const float WATER_X = 532;//115.15+PAINTX3
-const float WATER_Y = 994;//PAINT_Y-36
+const float WATER_Y = 1014;//PAINT_Y-36
 const coord cPaint1 = {PAINT_X1, PAINT_Y};
 const coord cPaint2 = {PAINT_X2, PAINT_Y};
 const coord cPaint3 = {PAINT_X3, PAINT_Y};
 const coord cWater = {WATER_X, WATER_Y};
+const float WIPE_X1 = 390 + COORD_OFFSET_X;
+const float WIPE_Y1 = 775 + COORD_OFFSET_Y;
+const float WIPE_Y2 = 700 + COORD_OFFSET_Y;
+const float WIPE_X2 = 470 + COORD_OFFSET_X;
+const coord cWipeBL = {WIPE_X1, WIPE_Y1};
+const coord cWipeTL = {WIPE_X1, WIPE_Y2};
+const coord cWipeBR = {WIPE_X2, WIPE_Y1};
+const coord cWipeTR = {WIPE_X2, WIPE_Y2};
+
 const int DIP_STEPS = 100; //number of steps down from cPaint to move to dip brush
+
 
 //// coordinates of motors (useful when calculating line lengths)
 const float MOTOR_L_X = 0;
