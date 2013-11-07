@@ -22,7 +22,7 @@ class Example(Tk.Frame):
 
     def initPic(self):
 
-        imageName = "../imageFiltering/teamTestPic.png"
+        imageName = "../imageFiltering/webcam.png"
 
         self.xmax = 160
         self.ymax = 120
