@@ -22,13 +22,13 @@ class Example(Tk.Frame):
 
     def initPic(self):
 
-        imageName = "../imageFiltering/webcam.png"
+        imageName = "../imageFiltering/webcam2.png"
 
-        self.xmax = 160
-        self.ymax = 120
+        self.xmax = 506 
+        self.ymax = 379 
         self.cropConstant = (20.0/26.0)
         self.croppedX = int(self.ymax*self.cropConstant)
-        box = (0, 0, self.xmax, self.ymax)
+        box = (0, 0, self.croppedX, self.ymax)
 
 
         self.parent.title("Label")
