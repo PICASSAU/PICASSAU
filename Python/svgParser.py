@@ -19,6 +19,9 @@ from xml.dom import minidom
 class svgParser:
     def __init__(self):
 
+        #load in file - here I'm doing it manually
+        self.file = "../svg/fox.svg"
+
         #instantiate some arrays we'll use
         self.commands0 = ['C']
         self.xCoords0 = [0]
@@ -79,14 +82,16 @@ class svgParser:
         self.scaleY = (self.canvasY/float(self.fileHeight[0]))*self.ardDist
         self.grabbedColors = [path.getAttribute('stroke') for path in
                               doc.getElementsByTagName('path')]
-        if not 'stroke' in self.grabbedColors:
+        if not 'stroke' in self.grabbedColors[0]:
             self.grabbedStyles = [path.getAttribute('style') for path in
                                   doc.getElementsByTagName('path')]
-            if not self.grabbedStyles:
-                self.grabbedColors =  [style.split('stroke:')[1]
-                                       for style in self.grabbedStyles]
+            useStyles = True
+        elif 'stroke' in self.grabbedStyles[0]:
+            self.grabbedColors =  [style.split('stroke:')[1]
+                                   for style in self.grabbedStyles]
+            useStyles = False
         doc.unlink()
-        return pathStrings
+        return pathStrings, useStyles
 
     def evalCurveEqtn(self, t, PArray):
         '''
@@ -191,8 +196,6 @@ class svgParser:
 def main():
 
     mySVG = svgParser()
-    #load in file - here I'm doing it manually
-    file = "../svg/world.svg"
 
     #N sets how many sections curves are divided into
     N = 10
@@ -221,8 +224,8 @@ def main():
     pathFirstYCoord = 0
 
     #read in the file and parse out the paths into an array of strings
-    svgStr = mySVG.readInFile(file)
-    pathStrings = mySVG.parsePaths(svgStr)
+    svgStr = mySVG.readInFile(mySVG.file)
+    pathStrings, useStyles = mySVG.parsePaths(svgStr)
 
     #iteratively run through the paths, correct letters, and reorganize
     #into the different arrays
@@ -231,7 +234,10 @@ def main():
         #Find the corresponding color for this path by checking grabbedColors
         #compare this color to the colors array, which contains each color only
         #once.  If the grabbed color isn't there, add it to the colors list.
-        currentColor = mySVG.grabbedColors[pathStrings.index(path)]
+        if useStyles is True:
+            currentColor = mySVG.grabbedStyles[pathStrings.index(path)]
+        else:
+            currentColor = mySVG.grabbedColors[pathStrings.index(path)]
         if currentColor not in mySVG.colors:
             mySVG.colors.append(currentColor)
         currentColorIndex = mySVG.colors.index(currentColor)

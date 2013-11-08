@@ -27,7 +27,7 @@ ycd2;  %list of y-coordinates for color 2
 clear
 
 %open the Python output file
-pyOutFile = fopen('pythonOutput2.txt');
+pyOutFile = fopen('pythonOutput.txt');
 
 %=================
 % get color 0 info
