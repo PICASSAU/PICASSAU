@@ -54,7 +54,7 @@ def main():
     root = Tk.Tk()
     ex = Example(root)
 
-    stupidSpaceConstant = '                                                    '
+    stupidSpaceConstant = '                                          '
 
     text1 = Tk.Label(root, text= stupidSpaceConstant + "Take Picture", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
     text1.grid(row = 0, column = 1)
