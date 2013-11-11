@@ -36,7 +36,7 @@ class Example(Tk.Frame):
         self.img = Image.open(imageName)
         self.imgCropped = self.img.crop(box)
         self.filteredImage = ImageTk.PhotoImage(self.imgCropped)
-        labelImage = Tk.Label(image=self.filteredImage, background='blue')
+        labelImage = Tk.Label(image=self.filteredImage, background='white')
 
         labelImage.image = self.filteredImage
         labelImage.grid(row = 2, column = 1, rowspan= 5)
@@ -46,7 +46,7 @@ class Example(Tk.Frame):
 
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
-        root.configure(background='blue')
+        root.configure(background='white')
 
 
 def main():
@@ -56,17 +56,17 @@ def main():
 
     root.overrideredirect(1)
 
-    text1 = Tk.Label(root, text= "    Take Picture >", font=("Helvetica", 32, "bold"), fg='orange', bg = 'blue')
+    text1 = Tk.Label(root, text= "    Take Picture >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
     text1.grid(row = 2, column = 2)
 
-    text2 = Tk.Label(root, text= "         Continue >", font=("Helvetica", 32, "bold"), fg='orange', bg = 'blue')
+    text2 = Tk.Label(root, text= "         Continue >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
     text2.grid(row = 6, column = 2)
     ex.setGeometry(root)
 
-    dummyText = Tk.Label(root, text = '    ', bg = 'blue')
+    dummyText = Tk.Label(root, text = '    ', bg = 'white')
     dummyText.grid(row = 0, column = 0)
     
-    dummyText2 = Tk.Label(root, text = '    ', bg = 'blue')
+    dummyText2 = Tk.Label(root, text = '    ', bg = 'white')
     dummyText2.grid(row = 1, column = 0)
 
     root.mainloop()
