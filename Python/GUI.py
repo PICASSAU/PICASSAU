@@ -39,7 +39,7 @@ class Example(Tk.Frame):
         labelImage = Tk.Label(image=self.filteredImage, background='blue')
 
         labelImage.image = self.filteredImage
-        labelImage.grid(row = 0, column = 0, rowspan= 5)
+        labelImage.grid(row = 1, column = 1, rowspan= 5)
 
 
     def setGeometry(self, root):
@@ -57,11 +57,14 @@ def main():
     stupidSpaceConstant = '                           '
 
     text1 = Tk.Label(root, text= stupidSpaceConstant + "Take Picture", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
-    text1.grid(row = 0, column = 1)
+    text1.grid(row = 1, column = 2)
 
     text2 = Tk.Label(root, text= stupidSpaceConstant + "Continue", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
-    text2.grid(row = 4, column = 1)
+    text2.grid(row = 5, column = 2)
     ex.setGeometry(root)
+
+    dummyText = Tk.Label(root, text = '    ', bg = 'blue')
+    dummyText.grid(row = 0, column = 0)
 
     root.mainloop()
 
