@@ -26,6 +26,7 @@ class Example(Tk.Frame):
 
         self.xmax = 506
         self.ymax = 379
+        self.ymax = int(self.ymax * 0.9)
         self.cropConstant = (20.0/26.0)
         self.croppedX = int(self.ymax*self.cropConstant)
         box = (0, 0, self.croppedX, self.ymax)
@@ -39,7 +40,7 @@ class Example(Tk.Frame):
         labelImage = Tk.Label(image=self.filteredImage, background='blue')
 
         labelImage.image = self.filteredImage
-        labelImage.grid(row = 1, column = 0)
+        labelImage.grid(row = 0, column = 0, rowspan= 5)
 
 
     def setGeometry(self, root):
@@ -53,11 +54,11 @@ def main():
 
     root = Tk.Tk()
     ex = Example(root)
-    text1 = Tk.Label(root, text="         Take Picture ", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
+    text1 = Tk.Label(root, text="          Take Picture ", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
     text1.grid(row = 0, column = 2)
 
-    text2 = Tk.Label(root, text="         Continue ", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
-    text2.grid(row = 2, column = 2)
+    text2 = Tk.Label(root, text="          Continue ", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
+    text2.grid(row = 4, column = 2)
     ex.setGeometry(root)
 
     root.mainloop()
