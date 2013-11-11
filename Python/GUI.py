@@ -14,13 +14,14 @@ from PIL import Image, ImageTk
 import Tkinter as Tk
 
 
-class Example(Tk.Frame):
+class myGUI(Tk.Frame):
 
     def __init__(self, parent):
         Tk.Frame.__init__(self, parent)
 
         self.parent = parent
         self.initPic()
+        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
     def initPic(self):
 
@@ -45,10 +46,21 @@ class Example(Tk.Frame):
 
 
     def setGeometry(self, root):
-
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
         root.configure(background='white')
+
+
+    def readFromArduino(self):
+        self.ser.flush()
+        ardCheck = self.ser.readline()
+        return ardCheck
+
+
+    def sendToArduino(self, message):
+        serOut = str(message) + '\n'
+        self.ser.write(serOut)
+        return serOut
 
 
 def main():
@@ -67,9 +79,36 @@ def main():
 
     dummyText = Tk.Label(root, text = '    ', bg = 'white')
     dummyText.grid(row = 0, column = 0)
-    
+
     dummyText2 = Tk.Label(root, text = '    ', bg = 'white')
     dummyText2.grid(row = 1, column = 0)
+
+
+    #start talking to Arduino
+    print "Start talking to Arduino"
+
+    while(1):
+        arduinoMessage = myGUI.readFromArduino()
+        if arduinoMessage == 'T':
+            myGUI.sendToArduino('T')
+            nextByte = myGUI.readFromArduino()
+            if nextByte == 'G':
+                #do the "take picture" stuff
+                pass
+        elif arduinoMessage == 'C':
+            myGUI.sendToArduino('C')
+            nextByte = myGUI.readFromArduino()
+            if nextByte == 'G':
+                #do the "continue" stuff
+                pass
+        elif 'D' in arduinoMessage:
+            threshold1 = arduinoMessage.split(',')[1]
+            threshold2 = arduinoMessage.split(',')[2]
+            threshold3 = arduinoMessage.split(',')[3]
+        else:
+            pass
+
+
 
     root.mainloop()
 

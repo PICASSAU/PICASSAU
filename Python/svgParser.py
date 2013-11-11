@@ -452,7 +452,7 @@ def main():
         if '\n' in ardCheck: #sometimes the check is just a new line character
                              #if this is the case, read it again
             ardCheck = mySVG.readFromArduino()
-        while(serOut not in ardCheck): #we're looking for our output to match the check
+        while(serOut != ardCheck): #we're looking for our output to match the check
                                        #so keep sending/reading until they match
             serOut = mySVG.sendToArduino1(index)
             ardCheck = mySVG.readFromArduino()
@@ -480,7 +480,7 @@ def main():
         if '\n' in ardCheck: #sometimes the check is just a new line character
                              #if this is the case, read it again
             ardCheck = mySVG.readFromArduino()
-        while(serOut not in ardCheck): #we're looking for our output to match the check
+        while(serOut != ardCheck): #we're looking for our output to match the check
                                        #so keep sending/reading until they match
             serOut = mySVG.sendToArduino2(index)
             ardCheck = mySVG.readFromArduino()
