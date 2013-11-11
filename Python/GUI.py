@@ -26,7 +26,6 @@ class Example(Tk.Frame):
 
         self.xmax = 506
         self.ymax = 379
-        self.ymax = int(self.ymax * 0.9)
         self.cropConstant = (20.0/26.0)
         self.croppedX = int(self.ymax*self.cropConstant)
         box = (0, 0, self.croppedX, self.ymax)
