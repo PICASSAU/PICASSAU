@@ -54,6 +54,7 @@ def main():
     root = Tk.Tk()
     ex = Example(root)
 
+    root.overrideredirect(1)
 
     text1 = Tk.Label(root, text= "    Take Picture >", font=("Helvetica", 32, "bold"), fg='orange', bg = 'blue')
     text1.grid(row = 1, column = 2)
