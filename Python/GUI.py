@@ -54,12 +54,12 @@ def main():
     root = Tk.Tk()
     ex = Example(root)
 
-    stupidSpaceConstant = '                           '
+    stupidSpaceConstant = '                        '
 
     text1 = Tk.Label(root, text= stupidSpaceConstant + "Take Picture >", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
     text1.grid(row = 1, column = 2)
 
-    text2 = Tk.Label(root, text= stupidSpaceConstant + "     Continue >", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
+    text2 = Tk.Label(root, text= stupidSpaceConstant + "      Continue >", font=("Helvetica", 20, "bold"), fg='orange', bg = 'blue')
     text2.grid(row = 5, column = 2)
     ex.setGeometry(root)
 
