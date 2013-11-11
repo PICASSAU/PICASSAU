@@ -55,10 +55,10 @@ def main():
     ex = Example(root)
 
 
-    text1 = Tk.Label(root, text= "   Take Picture >", font=("Helvetica", 30, "bold"), fg='orange', bg = 'blue')
+    text1 = Tk.Label(root, text= "  Take Picture >", font=("Helvetica", 32, "bold"), fg='orange', bg = 'blue')
     text1.grid(row = 1, column = 2)
 
-    text2 = Tk.Label(root, text= "       Continue >", font=("Helvetica", 30, "bold"), fg='orange', bg = 'blue')
+    text2 = Tk.Label(root, text= "      Continue >", font=("Helvetica", 32, "bold"), fg='orange', bg = 'blue')
     text2.grid(row = 5, column = 2)
     ex.setGeometry(root)
 
