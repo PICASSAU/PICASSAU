@@ -13,20 +13,21 @@
 from PIL import Image, ImageTk
 import Tkinter as Tk
 import serial
-
+import cv2
+import numpy as np
 
 class myGUI(Tk.Frame):
 
-    def __init__(self, parent):
+    def __init__(self, parent, image):
         Tk.Frame.__init__(self, parent)
 
         self.parent = parent
-        self.initPic()
+        self.initPic(image)
 #        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
-    def initPic(self):
+    def initPic(self, img):
 
-        imageName = "../imageFiltering/webcam2.png"
+#        imageName = "../imageFiltering/webcam2.png"
 
         self.xmax = 506
         self.ymax = 379
@@ -34,19 +35,24 @@ class myGUI(Tk.Frame):
         self.croppedX = int(self.ymax*self.cropConstant)
         box = (0, 0, self.croppedX, self.ymax)
 
-
         self.parent.title("PICASSAU GUI")
 
-        self.img = Image.open(imageName)
-        self.imgCropped = self.img.crop(box)
-        self.filteredImage = ImageTk.PhotoImage(self.imgCropped)
-        labelImage = Tk.Label(image=self.filteredImage, background='white')
+#        self.img = Image.open(imageName)
 
-        labelImage.image = self.filteredImage
+	img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+	print "displaying image"
+	pil_img = Image.fromarray(img)
+
+        imgCropped = pil_img.crop(box)
+
+        filteredImage = ImageTk.PhotoImage(imgCropped)
+        labelImage = Tk.Label(image=filteredImage, background='white')
+
+        labelImage.image = filteredImage
         labelImage.grid(row = 2, column = 1, rowspan= 5)
 
-
     def setGeometry(self, root):
+
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
         root.configure(background='white')
@@ -63,13 +69,20 @@ class myGUI(Tk.Frame):
         self.ser.write(serOut)
         return serOut
 
+    def close(self):
+	self.parent.destroy()
 
 def main():
 
     root = Tk.Tk()
-    ex = myGUI(root)
+    imgCounter = 0
+    cam = cv2.VideoCapture(0)
+    while imgCounter < 3:
+        ret, frame = cam.read()
+	imgCounter += 1
+    ex = myGUI(root, frame)
 
-    root.overrideredirect(1)
+    root.overrideredirect(1)  #this hides the title bar in the GUI
 
     text1 = Tk.Label(root, text= "    Take Picture >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
     text1.grid(row = 2, column = 2)
@@ -84,11 +97,13 @@ def main():
     dummyText2 = Tk.Label(root, text = '    ', bg = 'white')
     dummyText2.grid(row = 1, column = 0)
 
+    root.after(5000, ex.close)
     root.mainloop()
 
+'''
     #start talking to Arduino
     print "Start talking to Arduino"
-'''
+
     while(1):
         arduinoMessage = myGUI.readFromArduino()
         if arduinoMessage == 'T':
