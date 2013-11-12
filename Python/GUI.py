@@ -84,6 +84,7 @@ class myGUI(Tk.Frame):
                 self.threshold3 = arduinoMessage.split(',')[3]
         else:
             pass
+        self.parent.after(100, ex.checkArduino)
 
 
     def readFromArduino(self):
@@ -126,7 +127,7 @@ def main():
     dummyText2.grid(row = 1, column = 0)
 
     root.after(5000, ex.close)
-    root.after(500, ex.checkArduino)
+    root.after(100, ex.checkArduino)
     root.mainloop()
 
 if __name__ == '__main__':
