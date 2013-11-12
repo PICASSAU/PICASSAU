@@ -22,10 +22,9 @@ class myGUI(Tk.Frame):
         Tk.Frame.__init__(self, parent)
 
         self.parent = parent
-        self.initPic()
 #        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
-    def initPic(self, img):
+    def initPic(self):
 
         self.xmax = 506
         self.ymax = 379
@@ -44,21 +43,20 @@ class myGUI(Tk.Frame):
         imgCropped = pil_img.crop(box)
 
         filteredImage = ImageTk.PhotoImage(imgCropped)
-        labelImage = Tk.Label(image=filteredImage, background='white')
+	return filteredImage
 
-        labelImage.image = filteredImage
-        labelImage.grid(row = 2, column = 1, rowspan= 5)
+    def setGeometry(self, root, image, str1, str2):
 
-    def setGeometry(self, root):
-
-
-        text1 = Tk.Label(root, text= "    Take Picture >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
+        text1 = Tk.Label(root, text= str1 + " >\n\n\n\n\n\n" + str2 + " >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white', justify='right')
         text1.grid(row = 2, column = 2)
 
-        text2 = Tk.Label(root, text= "         Continue >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
-        text2.grid(row = 6, column = 2)
 
         #set image geometry
+        labelImage = Tk.Label(image=image, background='white')
+
+        labelImage.image = image
+        labelImage.grid(row = 2, column = 1, rowspan= 5)
+
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
         root.configure(background='white')
@@ -77,8 +75,6 @@ class myGUI(Tk.Frame):
             imgCounter += 1
         return frame
 
-
-
     def checkArduino(self):
 
         #start talking to Arduino
@@ -95,8 +91,8 @@ class myGUI(Tk.Frame):
             self.sendToArduino('C\n')
             nextByte = self.readFromArduino()
             if nextByte == 'G':
-                #do the "continue" stuff
-                pass
+               self.areYouSure()
+               pass
         elif 'D' in arduinoMessage:
             self.sendToArduino(arduinoMessage)
             if nextByte == 'G':
@@ -105,6 +101,7 @@ class myGUI(Tk.Frame):
                 self.threshold3 = arduinoMessage.split(',')[3]
         else:
             pass
+
         self.parent.after(100, ex.checkArduino)
 
 
@@ -119,22 +116,34 @@ class myGUI(Tk.Frame):
         self.ser.write(serOut)
         return serOut
 
+
     def close(self):
 	self.parent.destroy()
+
+    def areYouSure(self):
+    	ays = Image.open("AreYouSure.png")
+	ays = ImageTk.PhotoImage(ays)
+
+        self.setGeometry(self.parent, ays, "         Go back", "Paint now")
 
 def main():
 
     root = Tk.Tk()
 
     ex = myGUI(root)
+    image = ex.initPic()
 
     root.overrideredirect(1)  #this hides the title bar in the GUI
 
-    ex.setGeometry(root)
+    ex.setGeometry(root, image, "      Take Picture", "Continue")
 
-    root.after(5000, ex.close)
+    root.after(4000, ex.areYouSure)
+
+    root.after(8000, ex.close)
     root.after(100, ex.checkArduino)
     root.mainloop()
+
+
 
 if __name__ == '__main__':
     main()
