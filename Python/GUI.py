@@ -58,6 +58,34 @@ class myGUI(Tk.Frame):
         root.configure(background='white')
 
 
+    def checkArduino(self):
+
+        #start talking to Arduino
+        print "Start talking to Arduino"
+
+        arduinoMessage = self.readFromArduino()
+        if arduinoMessage == 'T':
+            self.sendToArduino('T')
+            nextByte = self.readFromArduino()
+            if nextByte == 'G':
+                #do the "take picture" stuff
+                pass
+        elif arduinoMessage == 'C':
+            self.sendToArduino('C')
+            nextByte = self.readFromArduino()
+            if nextByte == 'G':
+                #do the "continue" stuff
+                pass
+        elif 'D' in arduinoMessage:
+            self.sendToArduino(arduinoMessage)
+            if nextByte == 'G':
+                self.threshold1 = arduinoMessage.split(',')[1]
+                self.threshold2 = arduinoMessage.split(',')[2]
+                self.threshold3 = arduinoMessage.split(',')[3]
+        else:
+            pass
+
+
     def readFromArduino(self):
         self.ser.flush()
         ardCheck = self.ser.readline()
@@ -98,38 +126,8 @@ def main():
     dummyText2.grid(row = 1, column = 0)
 
     root.after(5000, ex.close)
+    root.after(500, ex.checkArduino)
     root.mainloop()
-
-'''
-    #start talking to Arduino
-    print "Start talking to Arduino"
-
-    while(1):
-        arduinoMessage = myGUI.readFromArduino()
-        if arduinoMessage == 'T':
-            myGUI.sendToArduino('T')
-            nextByte = myGUI.readFromArduino()
-            if nextByte == 'G':
-                #do the "take picture" stuff
-                pass
-        elif arduinoMessage == 'C':
-            myGUI.sendToArduino('C')
-            nextByte = myGUI.readFromArduino()
-            if nextByte == 'G':
-                #do the "continue" stuff
-                pass
-        elif 'D' in arduinoMessage:
-            myGUI.sendToArduino(arduinoMessage)
-            if nextByte == 'G':
-                threshold1 = arduinoMessage.split(',')[1]
-                threshold2 = arduinoMessage.split(',')[2]
-                threshold3 = arduinoMessage.split(',')[3]
-        else:
-            pass
-
-
-'''
-
 
 if __name__ == '__main__':
     main()
