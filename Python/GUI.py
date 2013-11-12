@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 #-------------------------------------------------------------------------------
-# Name:        module1
+# Name:        GUI.py
 # Purpose:
 #
-# Author:      Kayla
+# Author:      PICASSAU
 #
 # Created:     04/11/2013
 # Copyright:   (c) Kayla 2013
@@ -22,7 +22,7 @@ class myGUI(Tk.Frame):
 
         self.parent = parent
         self.initPic()
-        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
+#        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
     def initPic(self):
 
@@ -35,7 +35,7 @@ class myGUI(Tk.Frame):
         box = (0, 0, self.croppedX, self.ymax)
 
 
-        self.parent.title("Label")
+        self.parent.title("PICASSAU GUI")
 
         self.img = Image.open(imageName)
         self.imgCropped = self.img.crop(box)
@@ -84,10 +84,11 @@ def main():
     dummyText2 = Tk.Label(root, text = '    ', bg = 'white')
     dummyText2.grid(row = 1, column = 0)
 
+    root.mainloop()
 
     #start talking to Arduino
     print "Start talking to Arduino"
-
+'''
     while(1):
         arduinoMessage = myGUI.readFromArduino()
         if arduinoMessage == 'T':
@@ -112,9 +113,7 @@ def main():
             pass
 
 
-
-    root.mainloop()
-
+'''
 
 
 if __name__ == '__main__':

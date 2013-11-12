@@ -2,7 +2,7 @@
 # Name:        svgParser
 # Purpose:
 #
-# Author:      Kayla Frost
+# Author:      PICASSAU
 #
 # Created:     30/08/2013
 # Copyright:   (c) Kayla 2013
