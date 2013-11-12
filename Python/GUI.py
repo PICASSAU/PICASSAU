@@ -18,16 +18,14 @@ import numpy as np
 
 class myGUI(Tk.Frame):
 
-    def __init__(self, parent, image):
+    def __init__(self, parent):
         Tk.Frame.__init__(self, parent)
 
         self.parent = parent
-        self.initPic(image)
+        self.initPic()
 #        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
     def initPic(self, img):
-
-#        imageName = "../imageFiltering/webcam2.png"
 
         self.xmax = 506
         self.ymax = 379
@@ -37,11 +35,11 @@ class myGUI(Tk.Frame):
 
         self.parent.title("PICASSAU GUI")
 
-#        self.img = Image.open(imageName)
+        img = self.takePicture()
 
-	img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-	print "displaying image"
-	pil_img = Image.fromarray(img)
+    	img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+    	print "displaying image"
+    	pil_img = Image.fromarray(img)
 
         imgCropped = pil_img.crop(box)
 
@@ -53,9 +51,32 @@ class myGUI(Tk.Frame):
 
     def setGeometry(self, root):
 
+
+        text1 = Tk.Label(root, text= "    Take Picture >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
+        text1.grid(row = 2, column = 2)
+
+        text2 = Tk.Label(root, text= "         Continue >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
+        text2.grid(row = 6, column = 2)
+
+        #set image geometry
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
         root.configure(background='white')
+
+        dummyText = Tk.Label(root, text = '    ', bg = 'white')
+        dummyText.grid(row = 0, column = 0)
+
+        dummyText2 = Tk.Label(root, text = '    ', bg = 'white')
+        dummyText2.grid(row = 1, column = 0)
+
+    def takePicture(self):
+        imgCounter = 0
+        cam = cv2.VideoCapture(0)
+        while imgCounter < 3:
+            ret, frame = cam.read()
+            imgCounter += 1
+        return frame
+
 
 
     def checkArduino(self):
@@ -65,13 +86,13 @@ class myGUI(Tk.Frame):
 
         arduinoMessage = self.readFromArduino()
         if arduinoMessage == 'T':
-            self.sendToArduino('T')
+            self.sendToArduino('T\n')
             nextByte = self.readFromArduino()
             if nextByte == 'G':
                 #do the "take picture" stuff
                 pass
         elif arduinoMessage == 'C':
-            self.sendToArduino('C')
+            self.sendToArduino('C\n')
             nextByte = self.readFromArduino()
             if nextByte == 'G':
                 #do the "continue" stuff
@@ -104,27 +125,12 @@ class myGUI(Tk.Frame):
 def main():
 
     root = Tk.Tk()
-    imgCounter = 0
-    cam = cv2.VideoCapture(0)
-    while imgCounter < 3:
-        ret, frame = cam.read()
-	imgCounter += 1
-    ex = myGUI(root, frame)
+
+    ex = myGUI(root)
 
     root.overrideredirect(1)  #this hides the title bar in the GUI
 
-    text1 = Tk.Label(root, text= "    Take Picture >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
-    text1.grid(row = 2, column = 2)
-
-    text2 = Tk.Label(root, text= "         Continue >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white')
-    text2.grid(row = 6, column = 2)
     ex.setGeometry(root)
-
-    dummyText = Tk.Label(root, text = '    ', bg = 'white')
-    dummyText.grid(row = 0, column = 0)
-
-    dummyText2 = Tk.Label(root, text = '    ', bg = 'white')
-    dummyText2.grid(row = 1, column = 0)
 
     root.after(5000, ex.close)
     root.after(100, ex.checkArduino)
