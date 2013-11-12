@@ -12,6 +12,7 @@
 #-------------------------------------------------------------------------------
 from PIL import Image, ImageTk
 import Tkinter as Tk
+import serial
 
 
 class myGUI(Tk.Frame):
@@ -66,7 +67,7 @@ class myGUI(Tk.Frame):
 def main():
 
     root = Tk.Tk()
-    ex = Example(root)
+    ex = myGUI(root)
 
     root.overrideredirect(1)
 
@@ -102,9 +103,11 @@ def main():
                 #do the "continue" stuff
                 pass
         elif 'D' in arduinoMessage:
-            threshold1 = arduinoMessage.split(',')[1]
-            threshold2 = arduinoMessage.split(',')[2]
-            threshold3 = arduinoMessage.split(',')[3]
+            myGUI.sendToArduino(arduinoMessage)
+            if nextByte == 'G':
+                threshold1 = arduinoMessage.split(',')[1]
+                threshold2 = arduinoMessage.split(',')[2]
+                threshold3 = arduinoMessage.split(',')[3]
         else:
             pass
 
