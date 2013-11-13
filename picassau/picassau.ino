@@ -40,6 +40,7 @@ int newColor = 0;
 
 void setup()
 {
+  controlGUI();
   serialSetup();  //set up the serial stuff
   brushSetup(); //set up the brushes
   plottingSetup(); //set up the stepper motors
