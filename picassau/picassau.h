@@ -113,4 +113,8 @@ const int PIN_MOTOR_L_DIR = 10;
 const int PIN_MOTOR_R_STEP = 12;
 const int PIN_MOTOR_R_DIR = 13;
 const int PIN_IR_SENSOR = A0;
-
+const int PIN_KNOB_A = A3;
+const int PIN_KNOB_B = A2;
+const int PIN_KNOB_C = A1;
+const int PIN_BTN_TP = 7;
+const int PIN_BTN_CON = 6;
