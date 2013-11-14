@@ -20,7 +20,7 @@ def nothing(*args):
     pass
     
 class Tracer():
-    def __init__:
+    def __init__(self):
         self.commands0 = ['C']
         self.xCoords0 = [0]
         self.yCoords0 = [0]
@@ -44,72 +44,72 @@ class Tracer():
         
     
     #addArray takes an array of points and its it to the command and
-	# coordinate arrays.
-	#It assumes the first point should be an 'M'. 
+    # coordinate arrays.    
+    #It assumes the first point should be an 'M'. 
     def addArray0(self, points):
         #do some error checking:
-		if (points.shape[1] != 2): #should be 2 wide (x and y)
-			return	#do nothing
-		if (points.shape[0] < 2): #see if there are at least two points
-			return	#do nothing
-		
-		#append the first point as an 'M'
-		self.commands0.append('M')
-		self.xcoords0.append(points[0,0])
-		self.ycoords0.append(points[0,1])
-		
-		index = 1
-		while( index < points.shape[0] ):
-			self.commands0.append('L')
-			self.xcoords0.append(points[index,0])
-			self.ycoords0.append(points[index,1])
-			index = index+1
+        if (points.shape[1] != 2): #should be 2 wide (x and y)
+            return    #do nothing
+        if (points.shape[0] < 2): #see if there are at least two points
+            return    #do nothing
+        
+        #append the first point as an 'M'
+        self.commands0.append('M')
+        self.xCoords0.append(int(self.scaleFactorX*points[0,0]+0.5))
+        self.yCoords0.append(int(self.scaleFactorY*points[0,1]+0.5))
+        
+        index = 1
+        while( index < points.shape[0] ):
+            self.commands0.append('L')
+            self.xCoords0.append(int(self.scaleFactorX*points[index,0]+0.5))
+            self.yCoords0.append(int(self.scaleFactorY*points[index,1]+0.5))
+            index = index+1
             
     def addArray1(self, points):
         #do some error checking:
-		if (points.shape[1] != 2): #should be 2 wide (x and y)
-			return	#do nothing
-		if (points.shape[0] < 2): #see if there are at least two points
-			return	#do nothing
-		
-		#append the first point as an 'M'
-		self.commands1.append('M')
-		self.xcoords1.append(points[0,0])
-		self.ycoords1.append(points[0,1])
-		
-		index = 1
-		while( index < points.shape[0] ):
-			self.commands1.append('L')
-			self.xcoords1.append(points[index,0])
-			self.ycoords1.append(points[index,1])
-			index = index+1
+        if (points.shape[1] != 2): #should be 2 wide (x and y)
+            return    #do nothing
+        if (points.shape[0] < 2): #see if there are at least two points
+            return    #do nothing
+        
+        #append the first point as an 'M'
+        self.commands1.append('M')
+        self.xCoords1.append(int(self.scaleFactorX*points[0,0]+0.5))
+        self.yCoords1.append(int(self.scaleFactorY*points[0,1]+0.5))
+        
+        index = 1
+        while( index < points.shape[0] ):
+            self.commands1.append('L')
+            self.xCoords1.append(int(self.scaleFactorX*points[index,0]+0.5))
+            self.yCoords1.append(int(self.scaleFactorY*points[index,1]+0.5))
+            index = index+1
 
     def addArray2(self, points):
         #do some error checking:
-		if (points.shape[1] != 2): #should be 2 wide (x and y)
-			return	#do nothing
-		if (points.shape[0] < 2): #see if there are at least two points
-			return	#do nothing
-		
-		#append the first point as an 'M'
-		self.commands2.append('M')
-		self.xcoords2.append(points[0,0])
-		self.ycoords2.append(points[0,1])
-		
-		index = 1
-		while( index < points.shape[0] ):
-			self.commands2.append('L')
-			self.xcoords2.append(points[index,0])
-			self.ycoords2.append(points[index,1])
-			index = index+1
+        if (points.shape[1] != 2): #should be 2 wide (x and y)
+            return    #do nothing
+        if (points.shape[0] < 2): #see if there are at least two points
+            return    #do nothing
+        
+        #append the first point as an 'M'
+        self.commands2.append('M')
+        self.xCoords2.append(int(self.scaleFactorX*points[0,0]+0.5))
+        self.yCoords2.append(int(self.scaleFactorY*points[0,1]+0.5))
+        
+        index = 1
+        while( index < points.shape[0] ):
+            self.commands2.append('L')
+            self.xCoords2.append(int(self.scaleFactorX*points[index,0]+0.5))
+            self.yCoords2.append(int(self.scaleFactorY*points[index,1]+0.5))
+            index = index+1
             
     def writeToFile(self, file, list):
         file.write("[")
-		strList = [str(i) for i in list]
-		file.write(','.join(strList))
-		file.write("]\n")
+        strList = [str(i) for i in list]
+        file.write(','.join(strList))
+        file.write("]\n")
         
-    def traceBin(self, imgBin, color)
+    def traceBin(self, imgBin, color):
         #tiny erosion reduces color overlap and 
         #gets rid of tiny points that can occur on middle layers
         imgBin = cv2.erode(imgBin,tinyKernel)
@@ -125,16 +125,16 @@ class Tracer():
                 tessellation = curve.tesselate() #uses the default 'adaptive' interpolation
                 #and now put coords into the array
                 if (color == 0):
-                    addArray0(tessellation)
+                    self.addArray0(tessellation)
                 elif (color == 1):
-                    addArray1(tessellation)
-                else
-                    addArray2(tessellation)
+                    self.addArray1(tessellation)
+                else:
+                    self.addArray2(tessellation)
             
             imgBin = cv2.erode(imgBin, kernel) #go one layer deeper
 
         
-    def trace(self, img)
+    def trace(self, img):
         imBin1 = np.zeros_like(img)
         imBin2 = np.zeros_like(img)
         imBin3 = np.zeros_like(img)
@@ -162,43 +162,43 @@ class Tracer():
         self.yCoords2 = [0]
         
     def writeArray(self, file, list):
-		file.write("[")
-		strList = [str(i) for i in list]
-		file.write(','.join(strList))
-		file.write("]\n")
+        file.write("[")
+        strList = [str(i) for i in list]
+        file.write(','.join(strList))
+        file.write("]\n")
     
-    def writeFile(self, fileName)
-        if os.path.isfile(outputFileName):
-            os.remove(outputFileName)
-        file = open(outputFileName, 'w')
+    def writeFile(self, fileName):
+        if os.path.isfile(fileName):
+            os.remove(fileName)
+        file = open(fileName, 'w')
 
         file.write("commands0 = ")
-        myTracer.writeToFile(file, myTracer.commands)
+        self.writeToFile(file, self.commands0)
         file.write("xcoords0 = ")
-        myTracer.writeToFile(file, myTracer.xcoords)
+        self.writeToFile(file, self.xCoords0)
         file.write("ycoords0 = ")
-        myTracer.writeToFile(file, myTracer.ycoords)
+        self.writeToFile(file, self.yCoords0)
         
         file.write("commands1 = ")
-        mySVG.writeToFile(file, mySVG.commands1)
+        self.writeToFile(file, self.commands1)
         file.write("xCoords1 = ")
-        mySVG.writeToFile(file, mySVG.xCoords1)
+        self.writeToFile(file, self.xCoords1)
         file.write("yCoords1 = ")
-        mySVG.writeToFile(file, mySVG.yCoords1)
+        self.writeToFile(file, self.yCoords1)
         
         file.write("commands2 = ")
-        mySVG.writeToFile(file, mySVG.commands2)
+        self.writeToFile(file, self.commands2)
         file.write("xCoords2 = ")
-        mySVG.writeToFile(file, mySVG.xCoords2)
+        self.writeToFile(file, self.xCoords2)
         file.write("yCoords2 = ")
-        mySVG.writeToFile(file, mySVG.yCoords2)
+        self.writeToFile(file, self.yCoords2)
         
         file.close()
 
         
 class ImgProcessor():
     def __init__(self):
-        self.cam = VideoCapture(0)
+        self.cam = cv2.VideoCapture(0)
         self.thresh = (64,128,192)
         self.blurAmount = 7
         self.colorPalette = [[0,165,255],[255,118,72],[128,0,0]]
@@ -213,29 +213,31 @@ class ImgProcessor():
             cnt += 1
     
     def takePicture(self):
+        self.camAutoAdjust()
         ret, frame = self.cam.read()
-        self.frameCrop = frame[:,135:504,:]
-        self.imColor = np.zeros_like(frame_crop)
+        frameCrop = frame[:,135:504,:]
+        self.imColor = np.zeros_like(frameCrop)
+        self.imBlur = cv2.cvtColor(frameCrop, cv.CV_BGR2GRAY)
+        self.imBlur = cv2.medianBlur(self.imBlur,self.blurAmount)
         self.processPicture()
         
     def processPicture(self):
-        self.imBlur = cv2.cvtColor(self.frameCrop, cv.CV_BGR2GRAY)
-        self.imBlur = cv2.medianBlur(imBlur,self.blurAmt)
+        
         self.imPost = np.copy(self.imBlur)
-        self.imPost[self.imBlur >= thresh[2]] = 255
-        self.imPost[(self.imBlur >= thresh[1]) & (self.imBlur < thresh[2])] = 170
-        self.imPost[(self.imBlur >= thresh[0]) & (self.imBlur < thresh[1])] = 85
-        self.imPost[self.imBlur < thresh[0]]  = 0
+        self.imPost[self.imBlur >= self.thresh[2]] = 255
+        self.imPost[(self.imBlur >= self.thresh[1]) & (self.imBlur < self.thresh[2])] = 170
+        self.imPost[(self.imBlur >= self.thresh[0]) & (self.imBlur < self.thresh[1])] = 85
+        self.imPost[self.imBlur < self.thresh[0]]  = 0
         self.imPost = cv2.morphologyEx(self.imPost,cv2.MORPH_OPEN,kernel)
         self.imPost = cv2.morphologyEx(self.imPost,cv2.MORPH_CLOSE,kernel)
 
-        imColor = np.zeros_like(frame_crop)
-        imColor[imPost == 0] = self.colorPalette[2]
-        imColor[imPost == 85] = self.colorPalette[1]
-        imColor[imPost == 170] = self.colorPalette[0]
-        imColor[imPost == 255] = [255,255,255]
+        self.imColor = np.zeros_like(self.imColor)
+        self.imColor[self.imPost == 0] = self.colorPalette[2]
+        self.imColor[self.imPost == 85] = self.colorPalette[1]
+        self.imColor[self.imPost == 170] = self.colorPalette[0]
+        self.imColor[self.imPost == 255] = [255,255,255]
 
-        self.displayImage = cv2.resize(imColor, (291,379))
+        self.displayImage = cv2.resize(self.imColor, (291,379))
         
     def getDisplayImage(self):
         return self.displayImage
@@ -284,3 +286,7 @@ def main():
         if key == 10: #enter
             myTracer.trace(imProc.getPaintImage())
             myTracer.writeFile('../MATLAB/pythonOutput3.txt')
+            break
+
+if __name__ == "__main__":
+    main()
