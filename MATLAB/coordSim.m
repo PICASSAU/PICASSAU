@@ -27,7 +27,7 @@ ycd2;  %list of y-coordinates for color 2
 clear
 
 %open the Python output file
-pyOutFile = fopen('pythonOutput.txt');
+pyOutFile = fopen('pythonOutput3.txt');
 
 %=================
 % get color 0 info
@@ -118,7 +118,7 @@ if length(cmd0) > 1
             seg = plot([xcd0(i-1) xcd0(i)],[ycd0(i-1) ycd0(i)]);
             hold on;  %retain current graph while adding line segments
             set(seg,'Color',[0,0,.50]);  %dark blue
-            set(seg,'LineWidth',10);  %default is 0.5
+            set(seg,'LineWidth',4);  %default is 0.5
             %set(seg,'Marker','x');  %makes counting line segments easier
             xlim([0 744.09448]);
             ylim([-1052.3622 0]);
@@ -133,7 +133,7 @@ if length(cmd1) > 1
             seg = plot([xcd1(i-1) xcd1(i)],[ycd1(i-1) ycd1(i)]);
             hold on;  %retain current graph while adding line segments
             set(seg,'Color',[.25,.41,.88]);  %light blue
-            set(seg,'LineWidth',10);  %default is 0.5
+            set(seg,'LineWidth',4);  %default is 0.5
             set(seg,'Marker','.');  %makes counting line segments easier
             xlim([0 744.09448]);
             ylim([-1052.3622 0]);
@@ -148,7 +148,7 @@ if length(cmd2) > 1
             seg = plot([xcd2(i-1) xcd2(i)],[ycd2(i-1) ycd2(i)]);
             hold on;  %retain current graph while adding line segments
             set(seg,'Color',[1,.65,0]);  %burnt orange
-            set(seg,'LineWidth',10);  %default is 0.5
+            set(seg,'LineWidth',4);  %default is 0.5
             set(seg,'Marker','.');  %makes counting line segments easier
             xlim([0 744.09448]);
             ylim([-1052.3622 0]);
