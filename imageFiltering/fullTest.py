@@ -5,6 +5,7 @@ import time
 import datetime
 import potrace
 import os
+import serial
 
 kernel = np.array( [[0,0,1,1,1,0,0],
                     [0,1,1,1,1,1,0],
@@ -161,6 +162,11 @@ class Tracer():
         self.xCoords2 = [2]
         self.yCoords2 = [0]
         
+    def getArrays(self):
+        return commands0, xCoords0, yCoords0,
+                commands1, xCoords1, yCoords1,
+                commands2, xCoords2, yCoords2
+        
     def writeArray(self, file, list):
         file.write("[")
         strList = [str(i) for i in list]
@@ -262,13 +268,79 @@ class ImgProcessor():
         
         self.thresh = (A, B, C)
     
+class ArduinoComm():
+    def __init__(self):
+        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
+    
+    def close():
+        self.ser.close()    #close the comm port
+    
+    def sendCoordsToArduino(self, (c0, x0, y0, c1, x1, y1, c2, x2, y2)):
+        print "Start talking to Arduino"
+        self.sendSingleColor(c0, x0, y0)
+        self.sendSingleColor(c1, x1, y1)
+        self.sendSingleColor(c2, x2, y2)
+        readyByte = self.ser.read() #read 1 byte from Arduino
+        while readyByte is not 'R':
+            readyByte = self.ser.read() #wait for the ready signal from the Arduino #wait for the ready signal from the Arduino
+        print "got ready signal"
+        self.ser.write('D\n')
+        ardCheck = self.readFromArduino()
+        while 'D' not in ardCheck:
+            ardCheck = self.readFromArduino()
+            self.ser.write('D\n')
+        self.ser.write('G\n')
+        print "done"
+        
+    def sendSingleColor(self, c, x, y):
+        index = 0
+        for eachComm in c:
+            serOut = None
+            ardCheck = None
+            
+            readyByte = self.ser.read() #read 1 byte from Arduino
+            while readyByte is not 'R':
+                readyByte = self.ser.read() #wait for ready signal
+            print "got ready signal"
+            serOut = self.sendCoord(c, x, y, index) #send coordinate
+            print "serOut: "
+            ardCheck = self.readFromArduino()   #check for echo
+            print "ardCheck: " + ardCheck
+            if '\n' in ardCheck: #sometimes the check is just a new line character
+                                 #if this is the case, read it again
+                ardCheck = self.readFromArduino()
+                print ardCheck
+            while(serOut != ardCheck): #we're looking for our output to match the check
+                                        #so keep sending/reading until they match
+                serOut = self.sendCoord(c, x, y, index)
+                ardCheck = self.readFromArduino()
+                print "serOut: " + serOut
+                print "ardCheck: " + ardCheck
+            self.ser.write('G\n')#when you get the instructions to match, send out a
+                                   #go signal and wait for the Arduino to be ready again
+            print 'G'
+            index += 1
+            readyByte = None
+        #Next command...    
+            
+    def sendCoord(self, c, x, y, i):
+        serOut = str(c[i]) + ' ' + str(x[i]) + ',' + str(y[i]) + '\n'
+        self.ser.write(serOut)
+        return serOut
+    
+    def readFromArduino(self):
+        self.ser.flush()
+        ardCheck = self.ser.readline()
+        return ardCheck
 
 def main():
     imProc = ImgProcessor()
     myTracer = Tracer()
+    myArduino = ArduinoComm()
     
     imProc.camAutoAdjust()
     imProc.takePicture()
+    
     
     while True:
         cv2.imshow("test",imProc.getDisplayImage())
@@ -278,6 +350,7 @@ def main():
             key = key & 0xff
 
         if key == 27: #ESC
+            myArduino.close()
             break
             
         if key == 32: #this is space... bar
@@ -285,9 +358,9 @@ def main():
 
         if key == 10: #enter
             myTracer.trace(imProc.getPaintImage())
-            myTracer.writeFile('../MATLAB/pythonOutput3.txt')
-            cv2.imwrite("../MATLAB/outputPic.png",imProc.getDisplayImage())
-            break
+            myTracer.writeFile('../MATLAB/pythonOutput4.txt')
+            cv2.imwrite("../MATLAB/outputPic4.png",imProc.getDisplayImage())
+            myArduino.sendCoordsToArduino( myTracer.getArrays() )
 
 if __name__ == "__main__":
     main()
