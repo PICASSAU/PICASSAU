@@ -286,6 +286,7 @@ def main():
         if key == 10: #enter
             myTracer.trace(imProc.getPaintImage())
             myTracer.writeFile('../MATLAB/pythonOutput3.txt')
+            cv2.imwrite("../MATLAB/outputPic.png",imProc.getDisplayImage())
             break
 
 if __name__ == "__main__":
