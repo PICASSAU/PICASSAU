@@ -30,7 +30,8 @@ class myGUI(Tk.Frame):
         self.ymax = 379
         self.cropConstant = (20.0/26.0)
         self.croppedX = int(self.ymax*self.cropConstant)
-        box = (0, 0, self.croppedX, self.ymax)
+        self.box = (0, 0, self.croppedX, self.ymax)
+#        box = (0, 0, 291, 379)
 
         self.parent.title("PICASSAU GUI")
 
@@ -40,22 +41,24 @@ class myGUI(Tk.Frame):
     	print "displaying image"
     	pil_img = Image.fromarray(img)
 
-        imgCropped = pil_img.crop(box)
+        imgCropped = pil_img.crop(self.box)
 
         filteredImage = ImageTk.PhotoImage(imgCropped)
 	return filteredImage
 
     def setGeometry(self, root, image, str1, str2):
 
-        text1 = Tk.Label(root, text= str1 + " >\n\n\n\n\n\n" + str2 + " >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white', justify='right')
-        text1.grid(row = 2, column = 2)
+        self.buttonText = Tk.Label(root, text= str1 + " >\n\n\n\n\n\n" + str2 + " >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white', justify='right', width=15, anchor='e')
+        self.buttonText.grid(row = 2, column = 2)
 
 
         #set image geometry
-        labelImage = Tk.Label(image=image, background='white')
+        self.labelImage = Tk.Label(image=image, background='white')
 
-        labelImage.image = image
-        labelImage.grid(row = 2, column = 1, rowspan= 5)
+        #self.labelImage.image = image
+        self.labelImage.grid(row = 2, column = 1, rowspan= 5)
+        self.image = image  #must save in global var to make sure that
+            #garbage collection doesn't clean it out
 
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
@@ -66,6 +69,14 @@ class myGUI(Tk.Frame):
 
         dummyText2 = Tk.Label(root, text = '    ', bg = 'white')
         dummyText2.grid(row = 1, column = 0)
+
+    def changeImage(self, image):
+        self.labelImage.config(image = image )
+        self.image = image #must save in global var to make sure that
+            #garbage collection doesn't clean it out
+    
+    def changeText(self, str1, str2):
+        self.buttonText.config( text = str1 + " >\n\n\n\n\n\n" + str2 + " >" )
 
     def takePicture(self):
         imgCounter = 0
@@ -121,10 +132,13 @@ class myGUI(Tk.Frame):
 	self.parent.destroy()
 
     def areYouSure(self):
-    	ays = Image.open("AreYouSure.png")
-	ays = ImageTk.PhotoImage(ays)
+        ays = Image.open("AreYouSure.png")
+        ays = ImageTk.PhotoImage(ays)
 
-        self.setGeometry(self.parent, ays, "         Go back", "Paint now")
+#        self.setGeometry(self.parent, ays, "         Go back", "Paint now")
+#        self.setGeometry(self.parent, ays, "Go back", "Paint now")
+        self.changeImage(ays)
+        self.changeText("Go back", "Paint now")
 
 def main():
 
@@ -135,7 +149,8 @@ def main():
 
     root.overrideredirect(1)  #this hides the title bar in the GUI
 
-    ex.setGeometry(root, image, "      Take Picture", "Continue")
+#    ex.setGeometry(root, image, "      Take Picture", "Continue")
+    ex.setGeometry(root, image, "Take Picture", "Continue")
 
     root.after(4000, ex.areYouSure)
 
