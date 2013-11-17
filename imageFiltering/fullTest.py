@@ -7,7 +7,17 @@ import potrace
 import os
 import serial
 
-kernel = np.array( [[0,0,1,1,1,0,0],
+kernel9 = np.array( [[0,0,1,1,1,1,1,0,0],
+                     [0,1,1,1,1,1,1,1,0],
+                     [1,1,1,1,1,1,1,1,1],
+                     [1,1,1,1,1,1,1,1,1],
+                     [1,1,1,1,1,1,1,1,1],
+                     [1,1,1,1,1,1,1,1,1],
+                     [1,1,1,1,1,1,1,1,1],
+                     [0,1,1,1,1,1,1,1,0],
+                     [0,0,1,1,1,1,1,0,0]], dtype = np.uint8)
+
+kernel7 = np.array( [[0,0,1,1,1,0,0],
                     [0,1,1,1,1,1,0],
                     [1,1,1,1,1,1,1],
                     [1,1,1,1,1,1,1],
@@ -15,7 +25,11 @@ kernel = np.array( [[0,0,1,1,1,0,0],
                     [0,1,1,1,1,1,0],
                     [0,0,1,1,1,0,0]], dtype = np.uint8)
 
-tinyKernel = np.array( [[0,1,0],[1,1,1],[0,1,0]], dtype = np.uint8)
+kernel5 = np.array( [[0,1,1,1,0],
+                    [1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],
+                    [0,1,1,1,0]], dtype = np.uint8)
+
+kernel3 = np.array( [[0,1,0],[1,1,1],[0,1,0]], dtype = np.uint8)
 
 def nothing(*args):
     pass
@@ -34,8 +48,8 @@ class Tracer():
         self.xCoords2 = [2]
         self.yCoords2 = [0]
         
-        canvasX = 20.0
-        canvasY = 26.0
+        canvasX = 18.0#20.0
+        canvasY = 14.0#26.0
         imgX = 369.0
         imgY = 480.0
         ardDist = (200/8.25)
@@ -56,14 +70,14 @@ class Tracer():
         
         #append the first point as an 'M'
         self.commands0.append('M')
-        self.xCoords0.append(int(self.scaleFactorX*points[0,0]+0.5))
-        self.yCoords0.append(int(self.scaleFactorY*points[0,1]+0.5))
+        self.xCoords0.append(int(self.scaleFactorX*(points[0,0]-1)+0.5))
+        self.yCoords0.append(int(self.scaleFactorY*(points[0,1]-1)+0.5))
         
         index = 1
         while( index < points.shape[0] ):
             self.commands0.append('L')
-            self.xCoords0.append(int(self.scaleFactorX*points[index,0]+0.5))
-            self.yCoords0.append(int(self.scaleFactorY*points[index,1]+0.5))
+            self.xCoords0.append(int(self.scaleFactorX*(points[index,0]-1)+0.5))
+            self.yCoords0.append(int(self.scaleFactorY*(points[index,1]-1)+0.5))
             index = index+1
             
     def addArray1(self, points):
@@ -75,14 +89,14 @@ class Tracer():
         
         #append the first point as an 'M'
         self.commands1.append('M')
-        self.xCoords1.append(int(self.scaleFactorX*points[0,0]+0.5))
-        self.yCoords1.append(int(self.scaleFactorY*points[0,1]+0.5))
+        self.xCoords1.append(int(self.scaleFactorX*(points[0,0]-1)+0.5))
+        self.yCoords1.append(int(self.scaleFactorY*(points[0,1]-1)+0.5))
         
         index = 1
         while( index < points.shape[0] ):
             self.commands1.append('L')
-            self.xCoords1.append(int(self.scaleFactorX*points[index,0]+0.5))
-            self.yCoords1.append(int(self.scaleFactorY*points[index,1]+0.5))
+            self.xCoords1.append(int(self.scaleFactorX*(points[index,0]-1)+0.5))
+            self.yCoords1.append(int(self.scaleFactorY*(points[index,1]-1)+0.5))
             index = index+1
 
     def addArray2(self, points):
@@ -94,14 +108,14 @@ class Tracer():
         
         #append the first point as an 'M'
         self.commands2.append('M')
-        self.xCoords2.append(int(self.scaleFactorX*points[0,0]+0.5))
-        self.yCoords2.append(int(self.scaleFactorY*points[0,1]+0.5))
+        self.xCoords2.append(int(self.scaleFactorX*(points[0,0]-1)+0.5))
+        self.yCoords2.append(int(self.scaleFactorY*(points[0,1]-1)+0.5))
         
         index = 1
         while( index < points.shape[0] ):
             self.commands2.append('L')
-            self.xCoords2.append(int(self.scaleFactorX*points[index,0]+0.5))
-            self.yCoords2.append(int(self.scaleFactorY*points[index,1]+0.5))
+            self.xCoords2.append(int(self.scaleFactorX*(points[index,0]-1)+0.5))
+            self.yCoords2.append(int(self.scaleFactorY*(points[index,1]-1)+0.5))
             index = index+1
             
     def writeToFile(self, file, list):
@@ -113,10 +127,17 @@ class Tracer():
     def traceBin(self, imgBin, color):
         #tiny erosion reduces color overlap and 
         #gets rid of tiny points that can occur on middle layers
-        imgBin = cv2.erode(imgBin,tinyKernel)
+        imgBin = cv2.erode(imgBin,kernel5)
+
+        size = np.shape(imgBin)
+
+        #pad a border around the binary image. This will allow the erosions to
+        #erode away from the edge of the canvas
+        imgBinPadded = zeros((size[0]+2, size[1]+2), dtype=np.uint8)
+        imgBinPadded[1:-1,1:-1] = imgBin
 
         while True:
-            bmp = potrace.Bitmap(imgBin)    #bitmap in preparation for potrace
+            bmp = potrace.Bitmap(imgBinPadded)    #bitmap in preparation for potrace
             path = bmp.trace()  #trace it
             if (path.curves == []): #check for blank
                 break
@@ -132,7 +153,7 @@ class Tracer():
                 else:
                     self.addArray2(tessellation)
             
-            imgBin = cv2.erode(imgBin, kernel) #go one layer deeper
+            imgBin = cv2.erode(imgBinPadded, kernel9) #go one layer deeper
 
         
     def trace(self, img):
@@ -145,8 +166,8 @@ class Tracer():
         imBin2[img == 85] = 255
         imBin3[img == 0] = 255
 
-        self.traceBin( imBin1, 0 )
-        self.traceBin( imBin2, 1 )
+        self.traceBin( imBin2, 0 )
+        self.traceBin( imBin1, 1 )
         self.traceBin( imBin3, 2 )
         
     def clearArrays(self):
@@ -163,9 +184,7 @@ class Tracer():
         self.yCoords2 = [0]
         
     def getArrays(self):
-        return commands0, xCoords0, yCoords0,
-                commands1, xCoords1, yCoords1,
-                commands2, xCoords2, yCoords2
+        return self.commands0, self.xCoords0, self.yCoords0, self.commands1, self.xCoords1, self.yCoords1, self.commands2, self.xCoords2, self.yCoords2
         
     def writeArray(self, file, list):
         file.write("[")
@@ -234,8 +253,8 @@ class ImgProcessor():
         self.imPost[(self.imBlur >= self.thresh[1]) & (self.imBlur < self.thresh[2])] = 170
         self.imPost[(self.imBlur >= self.thresh[0]) & (self.imBlur < self.thresh[1])] = 85
         self.imPost[self.imBlur < self.thresh[0]]  = 0
-        self.imPost = cv2.morphologyEx(self.imPost,cv2.MORPH_OPEN,kernel)
-        self.imPost = cv2.morphologyEx(self.imPost,cv2.MORPH_CLOSE,kernel)
+        self.imPost = cv2.morphologyEx(self.imPost,cv2.MORPH_OPEN,kernel7)
+        self.imPost = cv2.morphologyEx(self.imPost,cv2.MORPH_CLOSE,kernel7)
 
         self.imColor = np.zeros_like(self.imColor)
         self.imColor[self.imPost == 0] = self.colorPalette[2]
@@ -361,6 +380,27 @@ def main():
             myTracer.writeFile('../MATLAB/pythonOutput4.txt')
             cv2.imwrite("../MATLAB/outputPic4.png",imProc.getDisplayImage())
             myArduino.sendCoordsToArduino( myTracer.getArrays() )
+
+        if key == ord('q'):
+            imProc.setKnobs(imProc.thresh[0]+1,imProc.thresh[1],imProc.thresh[2])
+            #imProc.processPicture()
+        if key == ord('a'):
+            imProc.setKnobs(imProc.thresh[0]-1,imProc.thresh[1],imProc.thresh[2])
+            #imProc.processPicture()
+        if key == ord('w'):
+            imProc.setKnobs(imProc.thresh[0],imProc.thresh[1]+1,imProc.thresh[2])
+            #imProc.processPicture()
+        if key == ord('s'):
+            imProc.setKnobs(imProc.thresh[0],imProc.thresh[1]-1,imProc.thresh[2])
+            #imProc.processPicture()
+        if key == ord('e'):
+            imProc.setKnobs(imProc.thresh[0],imProc.thresh[1],imProc.thresh[2]+1)
+            #imProc.processPicture()
+        if key == ord('d'):
+            imProc.setKnobs(imProc.thresh[0],imProc.thresh[1],imProc.thresh[2]-1)
+            #imProc.processPicture()
+        if key == ord('r'):
+            imProc.processPicture()
 
 if __name__ == "__main__":
     main()
