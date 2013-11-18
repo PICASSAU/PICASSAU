@@ -104,7 +104,7 @@ class GUI(Tk.Frame):
 
 
         #set image geometry
-        self.labelImage = Tk.Label(image=image, background='white')
+        self.labelImage = Tk.Label(image=image, background='black')
 
         #self.labelImage.image = image
         self.labelImage.grid(row = 2, column = 1, rowspan= 5)
