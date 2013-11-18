@@ -114,7 +114,7 @@ class myGUI(Tk.Frame):
                     self.areYouSure()
                 else:
                     self.endArduinoComm()
-        elif arduinoMessage[0] == 'D':
+        elif 'D' in arduinoMessage:
             self.sendToArduino(arduinoMessage)
             nextByte = self.readFromArduino()
             if nextByte == 'G':
