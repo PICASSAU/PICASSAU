@@ -149,12 +149,12 @@ class GUI(Tk.Frame):
                 if self.state == 0:
                     #do the "take picture" stuff
                     self.imProc.takePicture()
-                    self.changeImage(self.imProc.getDisplayImage())
+                    self.changeImage(ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(self.imProc.getDisplayImage(),cv2.COLOR_BGR2RGB))))
                 else:
                     #go back to the main screen
                     self.state = 0
                     self.changeText("Take Picture", "Continue")
-                    self.changeImage(self.imProc.getDisplayImage())
+                    self.changeImage(ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(self.imProc.getDisplayImage(),cv2.COLOR_BGR2RGB))))
         elif arduinoMessage == 'C':
             self.sendToArduino('C\n')
             nextByte = self.readFromArduino()
@@ -169,7 +169,7 @@ class GUI(Tk.Frame):
                     self.state = 0
                     #self.imProc.takePicture()
                     self.changeText("Take Picture", "Continue")
-                    self.changeImage(self.imProc.getDisplayImage())
+                    self.changeImage(ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(self.imProc.getDisplayImage(),cv2.COLOR_BGR2RGB))))
         elif arduinoMessage[0] == 'D':
             self.sendToArduino(arduinoMessage)
             nextByte = self.readFromArduino()
@@ -181,7 +181,7 @@ class GUI(Tk.Frame):
                         thresh3 = int(arduinoMessage.split(',')[3])
                         self.imProc.setKnobs(thresh1, thresh2, thresh3)
                         self.imProc.processPicture()
-                        self.changeImage(self.imProc.getDisplayImage())
+                        self.changeImage(ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(self.imProc.getDisplayImage(),cv2.COLOR_BGR2RGB))))
                     except ValueError:
                         print "Error converting D command: " + arduinoMessage
                 #no need to do anything if in state 1
@@ -440,6 +440,8 @@ class ImgProcessor():
     def takePicture(self):
         self.camAutoAdjust()
         ret, frame = self.cam.read()
+        #if not ret:
+        #    print "aslfdsdalkbgjlsdakbvjsdalfj"
         frameCrop = frame[:,135:504,:]
         self.imColor = np.zeros_like(frameCrop)
         self.imBlur = cv2.cvtColor(frameCrop, cv.CV_BGR2GRAY)
@@ -564,11 +566,17 @@ def main():
     myTracer = Tracer()
     myArduino = ArduinoComm()
 
+    imProc.camAutoAdjust()
+    imProc.takePicture()
+
     myGUI = GUI(root, imProc, myTracer, myArduino)
 
     root.overrideredirect(1)  #this hides the title bar in the GUI
 
-    myGUI.setGeometry(root, imProc.getDisplayImage(), "Take Picture", "Continue")
+    
+    image = ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(imProc.getDisplayImage(),cv2.COLOR_BGR2RGB)))
+
+    myGUI.setGeometry(root, image , "Take Picture", "Continue")
 
     #root.after(60000, myGUI.close) #used in debugging to make it close after 60sec
     root.after(100, myGUI.checkArduino)
