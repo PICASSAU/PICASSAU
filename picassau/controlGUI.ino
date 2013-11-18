@@ -1,4 +1,4 @@
-const int CGUI_SER_TIMEOUT = 1000; //in ms
+const int CGUI_SER_TIMEOUT = 10000; //in ms
 const char CGUI_QUEUE_SIZE = 8;    //needs to be a power of two
 const char CGUI_QUEUE_MOD = CGUI_QUEUE_SIZE - 1;
 const long CGUI_KNOB_SEND_TIME = 500; //in ms
@@ -27,6 +27,7 @@ void controlGUIDeInit()
 {
   detachInterrupt(INT_BTN_TP);
   detachInterrupt(INT_BTN_CON);
+  Serial.println("ending GUI");
 }
 
 void controlGUIInit()
@@ -124,8 +125,8 @@ char cgSendKnobs()
 char cgSendString( String s )
 {
   long t;
-  
-  Serial.println( s );
+  char temp;
+  //Serial.println( s );
   
   String s2;
   t = millis();
@@ -142,18 +143,20 @@ char cgSendString( String s )
         if ( (millis()-t) > CGUI_SER_TIMEOUT ) //check for timeout
           return 1;  //return timeout code
       }
-      s2 += Serial.read();
+      temp = Serial.read();
+      s2 += temp;
       
-      if (s2.endsWith("X")) //check for X
+      if (temp == 'X') //check for X
       {
         if (handleX())
           return 2;
       }
       
-    } while (!s2.endsWith("\n")); //keep going until you reach 
+    } while (temp != '\n'); //keep going until you reach 
+    //Serial.println("newline");
   } while (!s.equals(s2)); //if they don't match, try again
   
-  Serial.println("G\n");
+  Serial.println("G");
   
   return 0;
 }
@@ -197,6 +200,7 @@ char cgSendChar( char c )
     }
     
   } while ((c != c2) || (c3 != '\n'));
+  Serial.println("G");
   return 0;
 }
 
@@ -205,6 +209,7 @@ boolean handleX()
 {
   long t = millis();
   char temp;
+  while(Serial.available()){Serial.read();} //flush
   Serial.println('X');
   do
   {
@@ -214,7 +219,10 @@ boolean handleX()
         return false;
     }
     if (Serial.peek() == 'G')
+    {
+      temp = Serial.read(); //get it out of the buffer
       return true;
+    }
     else
       temp = Serial.read();
   } while (temp != '\n');
