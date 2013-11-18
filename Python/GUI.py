@@ -22,6 +22,9 @@ class myGUI(Tk.Frame):
         Tk.Frame.__init__(self, parent)
 
         self.parent = parent
+        self.state = 0  #state representing the display status
+                        # 0 = setup state (Take Picture, Continue)
+                        # 1 = "are you sure" state
 #        self.ser = serial.Serial('/dev/ttyUSB0') #9600 Baud, 8 data bits, No parity, 1 stop bit
 
     def initPic(self):
@@ -44,11 +47,11 @@ class myGUI(Tk.Frame):
         imgCropped = pil_img.crop(self.box)
 
         filteredImage = ImageTk.PhotoImage(imgCropped)
-	return filteredImage
+        return filteredImage
 
     def setGeometry(self, root, image, str1, str2):
 
-        self.buttonText = Tk.Label(root, text= str1 + " >\n\n\n\n\n\n" + str2 + " >", font=("Helvetica", 32, "bold"), fg='black', bg = 'white', justify='right', width=15, anchor='e')
+        self.buttonText = Tk.Label(root, text= str1 + " >\n\n\n\n\n\n" + str2 + " >", font=("Helvetica", 32, "bold"), fg="black", bg = "white", justify="right", width=15, anchor='e')
         self.buttonText.grid(row = 2, column = 2)
 
 
@@ -87,7 +90,6 @@ class myGUI(Tk.Frame):
         return frame
 
     def checkArduino(self):
-
         #start talking to Arduino
         print "Start talking to Arduino"
 
@@ -96,49 +98,60 @@ class myGUI(Tk.Frame):
             self.sendToArduino('T\n')
             nextByte = self.readFromArduino()
             if nextByte == 'G':
-                #do the "take picture" stuff
-                pass
+                if self.state == 0:
+                    #do the "take picture" stuff
+                    pass
+                else:
+                    self.state = 0
+                    self.changeText("Take Picture", "Continue")
+                    #self.changeImage(dummyImage)
         elif arduinoMessage == 'C':
             self.sendToArduino('C\n')
             nextByte = self.readFromArduino()
             if nextByte == 'G':
-               self.areYouSure()
-               pass
+                if self.state == 0:
+                    self.areYouSure()
+                else:
+                    self.endArduinoComm()
         elif 'D' in arduinoMessage:
             self.sendToArduino(arduinoMessage)
             if nextByte == 'G':
-                self.threshold1 = arduinoMessage.split(',')[1]
-                self.threshold2 = arduinoMessage.split(',')[2]
-                self.threshold3 = arduinoMessage.split(',')[3]
+                if self.state == 0:
+                    # self.threshold1 = arduinoMessage.split(',')[1]
+                    # self.threshold2 = arduinoMessage.split(',')[2]
+                    # self.threshold3 = arduinoMessage.split(',')[3]
         else:
             pass
 
         self.parent.after(100, ex.checkArduino)
-
 
     def readFromArduino(self):
         self.ser.flush()
         ardCheck = self.ser.readline()
         return ardCheck
 
-
     def sendToArduino(self, message):
         serOut = str(message) + '\n'
         self.ser.write(serOut)
         return serOut
 
+    def endArduinoComm(self):
+        self.sendToArduino('X')
+        firstByte = self.readFromArduino()
+        if firstByte == 'X':
+            self.sendToArduino('G')
+            secondByte == 'G':
+                #start painting!!!!! 
 
     def close(self):
-	self.parent.destroy()
+        self.parent.destroy()
 
     def areYouSure(self):
         ays = Image.open("AreYouSure.png")
         ays = ImageTk.PhotoImage(ays)
-
-#        self.setGeometry(self.parent, ays, "         Go back", "Paint now")
-#        self.setGeometry(self.parent, ays, "Go back", "Paint now")
         self.changeImage(ays)
         self.changeText("Go back", "Paint now")
+        self.state = 1
 
 def main():
 
@@ -149,7 +162,6 @@ def main():
 
     root.overrideredirect(1)  #this hides the title bar in the GUI
 
-#    ex.setGeometry(root, image, "      Take Picture", "Continue")
     ex.setGeometry(root, image, "Take Picture", "Continue")
 
     root.after(4000, ex.areYouSure)
