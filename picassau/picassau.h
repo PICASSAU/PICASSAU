@@ -35,7 +35,7 @@ const float MOTOR_DIST2 = MOTOR_DIST*MOTOR_DIST; //ditto
 const int STEP_THRESH = 0;
 
 // (0,0) is at the left spindle guide in absolute coordinates
-const int COORD_OFFSET_X = 115; //so at what coordinates is the top left
+const int COORD_OFFSET_X = 125; //so at what coordinates is the top left
 const int COORD_OFFSET_Y = 217;//290;//194; // corner of the canvas?
 
 //// calibration and sensor stuff
@@ -55,7 +55,7 @@ const int PAINT_WIGGLE_DIST = 5;
 const int DIP_WIGGLE_DIST = 5;
 const int WIPE_WIGGLE_DIST = 10;
 const int ROTATE_SERVO_HOME = 1;
-const int ARM_SERVO_UP = 80;
+const int ARM_SERVO_UP = 100;
 const int ARM_SERVO_DOWN = 45;
 
 //// constants for the timer interrupt (used for brush wiggling)
