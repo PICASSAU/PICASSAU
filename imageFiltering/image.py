@@ -16,15 +16,23 @@ cv.CreateTrackbar("B","posterized",128,255,nothing)
 cv.CreateTrackbar("C","posterized",64,255,nothing)
 
 strKey = "-1"
-kernel = np.array( [[0,0,0,1,1,1,0,0,0],
-		    [0,0,1,1,1,1,1,0,0],
-		    [0,1,1,1,1,1,1,1,0],
-		    [1,1,1,1,1,1,1,1,1],
-		    [1,1,1,1,1,1,1,1,1],
-		    [1,1,1,1,1,1,1,1,1],
-		    [0,1,1,1,1,1,1,1,0],
-		    [0,0,1,1,1,1,1,0,0],
-		    [0,0,0,1,1,1,0,0,0]] , dtype = np.uint8)
+#kernel = np.array( [[0,0,0,1,1,1,0,0,0],
+#		    [0,0,1,1,1,1,1,0,0],
+#		    [0,1,1,1,1,1,1,1,0],
+#		    [1,1,1,1,1,1,1,1,1],
+#		    [1,1,1,1,1,1,1,1,1],
+#		    [1,1,1,1,1,1,1,1,1],
+#		    [0,1,1,1,1,1,1,1,0],
+#		    [0,0,1,1,1,1,1,0,0],
+#		    [0,0,0,1,1,1,0,0,0]] , dtype = np.uint8)
+kernel = np.array( [[0,0,1,1,1,0,0],
+                    [0,1,1,1,1,1,0],
+                    [1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1],
+                    [0,1,1,1,1,1,0],
+                    [0,0,1,1,1,0,0]], dtype = np.uint8)
+
 
 #colorPalette = np.array([[0,165,255],[255,118,72],[128,0,0]], dtype = np.uint8)
 #colorPalette = 255 - colorPalette
@@ -41,7 +49,7 @@ while rval:
 	aBar = cv2.getTrackbarPos("A","posterized")
 	bBar = cv2.getTrackbarPos("B","posterized")
 	cBar = cv2.getTrackbarPos("C","posterized")
-	blurAmt = 11
+	blurAmt = 7#11
 
 	if aBar < bBar:
 		tempBar = aBar
