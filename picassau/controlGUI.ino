@@ -1,32 +1,60 @@
 const int CGUI_SER_TIMEOUT = 1000; //in ms
 const char CGUI_QUEUE_SIZE = 8;    //needs to be a power of two
 const char CGUI_QUEUE_MOD = CGUI_QUEUE_SIZE - 1;
+const long CGUI_KNOB_SEND_TIME = 500; //in ms
+const long CGUI_BTN_DEBOUNCE = 500; //in ms
 
 volatile char cgQueue[CGUI_QUEUE_SIZE];
 unsigned char firstIndex = 0;
 volatile unsigned char lastIndex = 0;
 
-char cgBuf[28]
+long tTP = 0;
+long tCon = 0;
+
+char cgBuf[28];
 char cgBufIndex = 0;
+
+int knobA, knobB, knobC = 0;
 
 void controlGUI()
 {
   controlGUIInit();
   controlGUILoop();
+  controlGUIDeInit(); //deinitialize
+}
+
+void controlGUIDeInit()
+{
+  detachInterrupt(INT_BTN_TP);
+  detachInterrupt(INT_BTN_CON);
 }
 
 void controlGUIInit()
 {
-  //set btns as inputs
-  //init queue
-  //attach interrupts
+  //set buttons as inputs
+  pinMode(PIN_BTN_TP, INPUT);
+  pinMode(PIN_BTN_CON, INPUT);
+  
+  //init the queue
+  for (int i = 0; i < CGUI_QUEUE_SIZE; i++)
+  {
+    cgQueue[i] = '\n'; //default value that won't confuse the other end
+  }
+  
+  //attach button interrupts
+  attachInterrupt(INT_BTN_TP, cgTPInt, RISING);
+  attachInterrupt(INT_BTN_CON, cgConInt, RISING);
+  
   //flush serial port
+  Serial.flush();
 }
 
 void controlGUILoop()
 {
   char blah = 1;
-  blah = (blah+1) % 10;
+  char ret = 0; //for the return value
+  long t = 0;
+  
   while (true)
   {
     //check serial (for end condition)
@@ -34,15 +62,65 @@ void controlGUILoop()
     
     while (firstIndex != lastIndex)
     {
-      cgSend( cgQueue[firstIndex] );
-      firstIndex = (firstIndex-1)&(CGUI_QUEUE_MOD);
+      ret = cgSendChar( cgQueue[firstIndex] );
+      if (ret == 2) //X
+        return;
+      if (ret == 1) //timeout
+        continue; //retry
+      firstIndex = (firstIndex+1)&(CGUI_QUEUE_MOD);
     }
-      
-    //read knobs
-    //send knobs
+    
+    if (millis()-t > CGUI_KNOB_SEND_TIME )
+    {
+      cgReadKnobs();
+      ret = cgSendKnobs();
+      if (ret == 2) //X
+          return;
+      //if it timed out, we can just try again later.
+      t = millis();
+    }
+    
   }
 }
 
+//button interrupts
+void cgTPInt()
+{
+  if (millis()-tTP > CGUI_BTN_DEBOUNCE)
+  {
+    cgQueue[lastIndex] = 'T';
+    lastIndex = (lastIndex+1)&(CGUI_QUEUE_MOD);
+    tTP = millis();
+  }
+}
+void cgConInt()
+{
+  if (millis()-tCon > CGUI_BTN_DEBOUNCE)
+  {
+    cgQueue[lastIndex] = 'C';
+    lastIndex = (lastIndex+1)&(CGUI_QUEUE_MOD);
+    tCon = millis();
+  }
+}
+
+void cgReadKnobs()
+{
+  knobA = analogRead(PIN_KNOB_A);
+  knobB = analogRead(PIN_KNOB_B);
+  knobC = analogRead(PIN_KNOB_C);
+}
+
+char cgSendKnobs()
+{
+  //divide knobs by 4 (to get 0-255 range) and convert to string
+  String strA = String((knobA >> 2),DEC);
+  String strB = String((knobB >> 2),DEC);
+  String strC = String((knobC >> 2),DEC);
+  String strSend = "D," + strA + "," + strB + "," + strC;
+  return cgSendString(strSend);
+}
+
+//returns 0 = success,  1 = timeout,  2 = X received
 char cgSendString( String s )
 {
   long t;
@@ -51,10 +129,11 @@ char cgSendString( String s )
   
   String s2;
   t = millis();
+  s = s + "\n"; //add new line
   
   do
   {
-    Serial.println( s );
+    Serial.print( s );
     s2 = "";
     do
     {
@@ -65,7 +144,7 @@ char cgSendString( String s )
       }
       s2 += Serial.read();
       
-      if (s2.endsWith('X')) //check for X
+      if (s2.endsWith("X")) //check for X
       {
         if (handleX())
           return 2;
@@ -79,6 +158,7 @@ char cgSendString( String s )
   return 0;
 }
 
+//returns 0 = success,  1 = timeout,  2 = X received
 char cgSendChar( char c )
 {
   long t;
@@ -117,10 +197,26 @@ char cgSendChar( char c )
     }
     
   } while ((c != c2) || (c3 != '\n'));
+  return 0;
 }
-  
+
+//checks to see if it's really an X (true) or not (false)
 boolean handleX()
 {
-  //confirm an X command
-  //return true if confirmed
+  long t = millis();
+  char temp;
+  Serial.println('X');
+  do
+  {
+    while (!Serial.available()) //wait for input
+    {
+      if ( (millis()-t) > CGUI_SER_TIMEOUT ) //check for timeout
+        return false;
+    }
+    if (Serial.peek() == 'G')
+      return true;
+    else
+      temp = Serial.read();
+  } while (temp != '\n');
+  return false;
 }

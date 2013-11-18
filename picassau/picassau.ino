@@ -40,7 +40,7 @@ int newColor = 0;
 
 void setup()
 {
-  controlGUI();
+//  controlGUI();
   serialSetup();  //set up the serial stuff
   brushSetup(); //set up the brushes
   plottingSetup(); //set up the stepper motors
@@ -115,7 +115,7 @@ void loop()
     {
       currentColor = newColor;
       washBrushWithDip();
-      strokeDist = 0;
+      strokeDist = PAINTING_DISTANCE / 2 ;
     }
     //otherwise it doesn't matter
   }

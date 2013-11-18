@@ -36,10 +36,10 @@ const int STEP_THRESH = 0;
 
 // (0,0) is at the left spindle guide in absolute coordinates
 const int COORD_OFFSET_X = 115; //so at what coordinates is the top left
-const int COORD_OFFSET_Y = 290;//194; // corner of the canvas?
+const int COORD_OFFSET_Y = 217;//290;//194; // corner of the canvas?
 
 //// calibration and sensor stuff
-const int IR_X = 95;//85; //3.5 inches
+const int IR_X = 75;//85; //3.5 inches
 const int IR_Y = 763; //30.25 inches
 const int IR_THRESHOLD = 150; //the ADC reading threshold to decide whether or not it sees anything during calibration
 const int MAX_CALIBRATION_STEPS = 558; //max upward movement during calib. before assuming you started above
@@ -116,5 +116,8 @@ const int PIN_IR_SENSOR = A0;
 const int PIN_KNOB_A = A3;
 const int PIN_KNOB_B = A2;
 const int PIN_KNOB_C = A1;
-const int PIN_BTN_TP = 7;
-const int PIN_BTN_CON = 6;
+const int PIN_BTN_TP = 7; //2?
+const int PIN_BTN_CON = 6; //3?
+
+const int INT_BTN_TP = 0;
+const int INT_BTN_CON = 1;
