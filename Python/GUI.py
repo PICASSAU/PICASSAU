@@ -142,6 +142,9 @@ class GUI(Tk.Frame):
         #print "Start talking to Arduino"
 
         arduinoMessage = self.readFromArduino()
+        if arduinoMessage == "":
+            self.parent.after(100, self.checkArduino)
+            return
         if arduinoMessage == 'T':
             self.sendToArduino('T\n')
             nextByte = self.readFromArduino()
@@ -204,18 +207,20 @@ class GUI(Tk.Frame):
 
     def endArduinoComm(self):
         self.sendToArduino('X')
+        print "ending comm"
         firstByte = self.readFromArduino()
-        while firstByte != 'X': #keep trying
+        while firstByte != 'X': #keep trying\
+            print firstByte
             self.sendToArduino('X')
             firstByte = self.readFromArduino()
         
         self.sendToArduino('G')
         self.ser.flush() #wait for it to finish sending
         self.ser.close() #release the port
-        painting()
+        self.painting()
         
     def painting(self):
-        self.myTracer.trace(imProc.getPaintImage())
+        self.myTracer.trace(self.imProc.getPaintImage())
         if (recordOutputCoordinateFile):
             self.myTracer.writeFile(outputCoordinateFileName)
         if (recordOutputImageFile):
@@ -333,7 +338,7 @@ class Tracer():
 
         #pad a border around the binary image. This will allow the erosions to
         #erode away from the edge of the canvas
-        imgBinPadded = zeros((size[0]+2, size[1]+2), dtype=np.uint8)
+        imgBinPadded = np.zeros((size[0]+2, size[1]+2), dtype=np.uint8)
         imgBinPadded[1:-1,1:-1] = imgBin
 
         while True:
