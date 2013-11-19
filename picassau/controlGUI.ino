@@ -211,7 +211,7 @@ boolean handleX()
   char temp;
   while(Serial.available()){Serial.read();} //flush
   Serial.println('X');
-  do
+  while(1)
   {
     while (!Serial.available()) //wait for input
     {
@@ -225,6 +225,6 @@ boolean handleX()
     }
     else
       temp = Serial.read();
-  } while (temp != '\n');
+  }
   return false;
 }

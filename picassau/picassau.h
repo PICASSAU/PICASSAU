@@ -103,8 +103,8 @@ const float MOTOR_R_Y = 0;
 const coord cMotorR = {MOTOR_R_X, MOTOR_R_Y};
 
 //// pin numbers
-const int PIN_BRUSH_SERVO = 2;
-const int PIN_ARM_SERVO = 3;
+const int PIN_BRUSH_SERVO = 6;//2
+const int PIN_ARM_SERVO = 7;//3
 const int PIN_ROTATE_SERVO = 8;
 //const int PIN_STEP_L[4] = {6,7,8,9};
 //const int PIN_STEP_R[4] = {10,11,12,13};
@@ -116,8 +116,8 @@ const int PIN_IR_SENSOR = A0;
 const int PIN_KNOB_A = A3;
 const int PIN_KNOB_B = A2;
 const int PIN_KNOB_C = A1;
-const int PIN_BTN_TP = 7; //2?
-const int PIN_BTN_CON = 6; //3?
+const int PIN_BTN_TP = 3;//7; //2?
+const int PIN_BTN_CON = 2;//6; //3?
 
-const int INT_BTN_TP = 0;
-const int INT_BTN_CON = 1;
+const int INT_BTN_TP = 1;
+const int INT_BTN_CON = 0;
