@@ -166,13 +166,15 @@ class GUI(Tk.Frame):
                     #go to the confirmation screen
                     self.areYouSure()
                 else:
+                    #bring the image back to look at
+                    self.changeImage(ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(self.imProc.getDisplayImage(),cv2.COLOR_BGR2RGB))))
                     #go the the painting stuff
                     self.endArduinoComm()
                     #then start over
                     self.state = 0
                     #self.imProc.takePicture()
                     self.changeText("Take Picture", "Continue")
-                    self.changeImage(ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(self.imProc.getDisplayImage(),cv2.COLOR_BGR2RGB))))
+                    
         elif arduinoMessage[0] == 'D':
             self.sendToArduino(arduinoMessage)
             nextByte = self.readFromArduino()
@@ -220,11 +222,13 @@ class GUI(Tk.Frame):
         self.painting()
         
     def painting(self):
+        self.changeText("Processing...","Please wait.")
         self.myTracer.trace(self.imProc.getPaintImage())
         if (recordOutputCoordinateFile):
             self.myTracer.writeFile(outputCoordinateFileName)
         if (recordOutputImageFile):
             cv2.imwrite(outputImageFileName,self.imProc.getDisplayImage())
+        self.changeText("Painting!"," ")
         self.paintComm.sendCoordsToArduino( self.myTracer.getArrays() )
             
 
@@ -358,7 +362,7 @@ class Tracer():
                 else:
                     self.addArray2(tessellation)
             
-            imgBin = cv2.erode(imgBinPadded, kernel9) #go one layer deeper
+            imgBinPadded = cv2.erode(imgBinPadded, kernel9) #go one layer deeper
 
         
     def trace(self, img):
