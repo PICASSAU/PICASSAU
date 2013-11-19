@@ -42,7 +42,7 @@ void setup()
 {
   serialSetup();  //set up the serial stuff
   
-  //controlGUI();
+  controlGUI();
   
   brushSetup(); //set up the brushes
   plottingSetup(); //set up the stepper motors
