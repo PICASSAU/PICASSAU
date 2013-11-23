@@ -258,7 +258,7 @@ class Tracer():
         self.yCoords2 = [0]
         
         canvasX = 18.0#20.0
-        canvasY = 14.0#26.0
+        canvasY = 24.0#26.0
         imgX = 369.0
         imgY = 480.0
         ardDist = (200/8.25)
